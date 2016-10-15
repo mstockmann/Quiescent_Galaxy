@@ -18,7 +18,7 @@ import string
 #@#@#@#@#@#@#@#@#@#@#@#@#@#@#@
 
 # target = 105842
-target = 108899
+# target = 108899
 # target = 90676
 # target = 155853
 # target = 171060
@@ -30,8 +30,12 @@ target = 108899
 
 
 # Select the path to final reduction products
-path = glob.glob('/Volumes/DataDrive/X-shooter/P93/Data/Reduction/%s/OB*/NIR_BananaCorr/Reduction/Output/xsh_scired_slit_nod_SCI_SLIT_FLUX_MERGE2D_NIR_NIR_x_.fits' % target)
+path = glob.glob('../../X-shooter/P93/Data/Reduction/%s/OB*/NIR_BananaCorr/Reduction/Output/xsh_scired_slit_nod_SCI_SLIT_FLUX_MERGE2D_NIR_NIR_x_.fits' % target)
+No_OB = len(glob.glob('../../X-shooter/P93/Data/Reduction/%s/OB*' % target))
 
+
+
+print '%s, Number of exposures / Finished reductions: %s / %s' % (target,len(path),No_OB)
 # Visual inspection of spectra in gaia
 for i in range(len(path)):
     os.system("gaia %s" % (path[i]))
