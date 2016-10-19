@@ -14,23 +14,22 @@ from functions import *
 
 ## SCIENCE TARGET ##
 
-target = '230929'; roll_list = [0,-1,2,0,-2,0]; psf_w1, psf_w2 = 45,60
-
+# target = '105842'; roll_list = [0,-1,-2,0]
+# target = '108899'; roll_list = [-1,0,-1,-3,0]
+# target = '155853'; roll_list = [-1,0,0,-3,0]
+# target = '171060'; roll_list = [1,1,-2,-2,-1]
+# target = '171687'; roll_list = [-3,-3,1,0,0]
+# target = '230929'; roll_list = [0,-1,2,0,-2,0]
+# target = '239220'; roll_list = [0,1,2,-1,-1]
+# target = '250513'; roll_list = [-1,1,0,0,0]
+# target = '773654'; roll_list = [1,1,-1,1,3]
+# target = '90676'; roll_list = [0,2,-1,-1,-2]
 
 
 Nsigma = 5 # Sigma clipping factor
 
-
-
-# General path  		CP-1243752_avwCombined_2xOB20110103_sig5_V2
-# root = '../../Data/Reduction/%s/OB*/NIR_BananaCorr/Reduction/Output/xsh_scired_slit_nod_SCI_SLIT_FLUX_MERGE2D_NIR_NIR_x_.fits' % (target)
-root = '../../Data/Reduction/%s/OB*/NIR_BananaCorr/sci_tellcorr_flux_merged2d_banana_nir_%s_OB*' % (target,target)
-
-# root = '../../%s/Reduction/OB*/VIS/sci_tellcorr_flux_merged2d_nir_%s_OB*.fits' % (target,target)
 						
-OB_paths = glob.glob(root)
-# print OB_paths, len(OB_paths)
-# raise
+OB_paths = glob.glob('../../../X-shooter/P93/Data/Reduction/%s/OB*/NIR_BananaCorr/sci_tellcorr_flux_merged2d_banana_nir_%s_OB*' % (target,target))
 
 
 
@@ -63,10 +62,8 @@ for ii in range(N_OB):
 	exec('bpm%s = BPM_%s[:flen_min,:min_len]' % (ii,ii))
 
 	## Plot wavelength collapsed trace
-	exec('plot_collapsed_trace_wavedirection(tmp%s,ii)' % ii)
-plt.vlines([psf_w1,psf_w2],-6,6,label='average psf: %s %s' % (psf_w1,psf_w2))  
+	exec('plot_collapsed_trace_wavedirection(tmp%s,ii)' % ii) 
 plt.title(OB_name[jj].split('/')[-1]+' (None corrected)')
-# plt.xlim([psf_w1-10,psf_w2+10])
 plt.show()
 
 ## Align trace (using continuous rolls)
@@ -78,7 +75,6 @@ for ii in range(N_OB):
 ## Plot the trace
 for ii in range(N_OB):
 	exec('plot_collapsed_trace_wavedirection(tmp%s,ii)' % ii)
-plt.vlines([psf_w1,psf_w2],-6,6,label='average psf: %s %s' % (psf_w1,psf_w2))
 plt.title(OB_name[jj].split('/')[-1]+' (Corrected)')
 plt.show()  
 
@@ -110,7 +106,7 @@ tmp_sig_bpc, emp_sig_bpc, Bpm_sig_bpc = remove_bad_pixels(tmp_sigclip,emp_sigcli
 F_avw_comb, E_avw_comb = calculate_average_weighted_mean(tmp_sig_bpc,emp_sig_bpc,Normalisation_const)
 
 ## Read out combined exposures
-path_out = '../../Data/Reduction/%s/Combined_OBs/NIR_Banana/%s_NIRBanana_avwCombined_tellcorr_%sxOB_sig%s_V1.fits' % (target,target,N_OB,Nsigma)
+path_out = '../../../X-shooter/P93/Data/Reduction/%s/Combined_OBs/NIR_Banana/%s_NIRBanana_avwCombined_tellcorr_%sxOB_sig%s_V1.fits' % (target,target,N_OB,Nsigma)
 print 'read out: %s' % path_out
 read_out_to_fits(path_out,F_avw_comb,E_avw_comb,Bpm_sig_bpc,hd_0,hd_1,hd_2)
 

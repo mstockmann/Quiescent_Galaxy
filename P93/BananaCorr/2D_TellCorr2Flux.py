@@ -14,7 +14,7 @@ import os
 
 
 def read_2d_fits(path):
-    f = pf.open(path_sci)
+    f = pf.open(path)
 
     hd1 = f[0].header
     hd2 = f[1].header

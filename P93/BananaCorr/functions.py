@@ -154,9 +154,9 @@ def read_out_to_fits(path,F,E,B,hd0,hd1,hd2):
 	    pf.append(path,B,hd2)
 
 	    # S/N spectrum
-	    hd3 = hd2
-	    hd3['EXTNAME'] = 'S2N'
-	    S2N = F/E
-	    pf.append(path, S2N, hd3)
+	    # hd3 = hd2
+	    # hd3['EXTNAME'] = 'S2N'
+	    # S2N = F/E
+	    # pf.append(path, S2N, hd3)
     else:
         print 'file already exists'

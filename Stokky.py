@@ -36,7 +36,16 @@ def read_in_1d_fits(path):
 
 
 
+def read_2d_fits(path):
+    f = pf.open(path)
 
+    hd1 = f[0].header
+    hd2 = f[1].header
+    hd3 = f[2].header
+    Arr1 = f[0].data
+    Arr2 = f[1].data
+    Arr3 = f[2].data
+    return Arr1, Arr2, Arr3, hd1, hd2, hd3
 
 
 
