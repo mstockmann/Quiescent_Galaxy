@@ -43,9 +43,23 @@ for i in range(len(path_correct_errs)):
 	F_f, E_f, Q_f, hd1_f, hd2_f, hd3_f = read_2d_fits(path_correct_flux[i])
 
 
-	F_f = F_f[:-1,:]
-	E_f = E_f[:-1,:]
-	Q_f = Q_f[:-1,:]
+	###
+	print 
+	print F_e.shape, E_e.shape, Q_e.shape
+	print F_f.shape, E_f.shape, Q_f.shape
+
+	E_e = np.roll(E_e,1,axis=1)
+	F_f = F_f[:-1,:-1]
+	E_f = E_f[:-1,:-1]
+	Q_f = Q_f[:-1,:-1]	
+
+	print '...'
+	print F_e.shape, E_e.shape, Q_e.shape
+	print F_f.shape, E_f.shape, Q_f.shape
+	print 
+	print 
+	###
+
 
 	path_out = '../../../X-shooter/P93/Data/Reduction/%s/Combined_OBs/NIR_corr' % obj
 	if not os.path.exists(path_out):
@@ -53,7 +67,6 @@ for i in range(len(path_correct_errs)):
 	path_out_name = path_out+'/'+filename.replace('V3','V1_NIR_corr')
 	print path_out_name
 	read_out_to_fits(path_out_name,F_f,E_e,Q_f,hd1_f,hd2_f,hd3_f)
-
 
 
 

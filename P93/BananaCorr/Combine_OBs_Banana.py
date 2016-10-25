@@ -23,14 +23,13 @@ from functions import *
 # target = '239220'; roll_list = [0,1,2,-1,-1]
 # target = '250513'; roll_list = [-1,1,0,0,0]
 # target = '773654'; roll_list = [1,1,-1,1,3]
-# target = '90676'; roll_list = [0,2,-1,-1,-2]
+target = '90676'; roll_list = [0,2,-1,-1,-2]
 
 
 Nsigma = 5 # Sigma clipping factor
 
 						
 OB_paths = glob.glob('../../../X-shooter/P93/Data/Reduction/%s/OB*/NIR_BananaCorr/sci_tellcorr_flux_merged2d_banana_nir_%s_OB*' % (target,target))
-
 
 
 N_OB = len(OB_paths)
@@ -94,9 +93,6 @@ exec('emp_merge = np.dstack((%s))' % merge_input_emp)
 exec('bpm_merge = np.dstack((%s))' % merge_input_bpm)
 
 ## Median sigma clipping
-# print len(tmp_merge[0,:]), len(emp_merge[0,:]), len(bpm_merge[0,:])
-# raise
-
 tmp_sigclip, emp_sigclip, bpm_sigclip = median_sigma_clipping(Nsigma,tmp_merge,emp_merge,bpm_merge,N_OB)
 
 ## Remove bad pixel
@@ -107,6 +103,8 @@ F_avw_comb, E_avw_comb = calculate_average_weighted_mean(tmp_sig_bpc,emp_sig_bpc
 
 ## Read out combined exposures
 path_out = '../../../X-shooter/P93/Data/Reduction/%s/Combined_OBs/NIR_Banana/%s_NIRBanana_avwCombined_tellcorr_%sxOB_sig%s_V1.fits' % (target,target,N_OB,Nsigma)
+
+
 print 'read out: %s' % path_out
 read_out_to_fits(path_out,F_avw_comb,E_avw_comb,Bpm_sig_bpc,hd_0,hd_1,hd_2)
 

@@ -27,12 +27,12 @@ def read_2d_fits(path):
 
 
 def Flux_Telluric_Correction(F,E,t):
-    F_t = np.zeros(shape=(len(F[:,0]),len(F[0,:])-1))
-    E_t  = np.zeros(shape=(len(E[:,0]),len(E[0,:])-1))
+    F_t = np.zeros(shape=(len(F[:,0]),len(F[0,:])))
+    E_t  = np.zeros(shape=(len(E[:,0]),len(E[0,:])))
 
     for j in range(len(F[:,0])):
-        F_t[j,:] = F[j,:-1]/t
-        E_t[j,:] = E[j,:-1]/t
+        F_t[j,:] = F[j,:]/t
+        E_t[j,:] = E[j,:]/t
     return F_t, E_t
 
 
@@ -98,7 +98,7 @@ for OB_no in range(len(Tpath)):
     # Because of bad edge removal the telluric 1d spectrum (not corrected for bad edges
     # due to the 1d format) is 1 pixel longer than the wavelength direction of the flux
     # spectrum
-    trans = (Tell_obs/Tell_model)[1:]
+    trans = (Tell_obs/Tell_model)#[1:]
     
     # We give negative ratio a zero weight (trans[i] = 1)
     for i in range(len(trans)):

@@ -20,11 +20,17 @@ import Stokky as st
 ####################################################
 
 
-def weighted_mean(F,E):
+def weighted_mean(F,E,M,Np):
+    N_zeros = abs(len(M) - np.count_nonzero(M))
+    if N_zeros > Np/3: # if 68 percent is zeros
+        M_wm = 1
+    else:
+        M_wm = 0
+
     w = 1/(E**2)
-    F_wm = np.sum(w*F)/np.sum(w)
+    F_wm = np.sum(w*F*M)/np.sum(w)
     E_wm = 1/np.sqrt(np.sum(w))
-    return F_wm,E_wm
+    return F_wm,E_wm, M_wm
 
 def SwapZerosAndOnes(Map):
     Map_swap = np.zeros(shape=(len(Map[:,0]),len(Map[0,:])))
@@ -50,7 +56,9 @@ def SwapZerosAndOnes(Map):
 
 path = glob.glob('../../../X-shooter/P93/Data/Reduction/*/Combined_OBs/NIR_corr/*_avwCombined_OBx*_sig5_V1_NIR_corr.fits')
 
+
 for k in range(len(path)):
+    print 'Object: %s' % path[k].split('/')[7]
 
     Flux, Err, BPM, hd_0, hd_1, hd_2 = st.read_2d_fits(path[k])
     Wave = hd_0['CRVAL1'] + (hd_0['CRPIX1'] - 1 + np.arange(hd_0['NAXIS1']))*hd_0['CDELT1'] # Aangstroem
@@ -58,12 +66,10 @@ for k in range(len(path)):
     # Swap 0 <-> 1 to use 
     BPM_alt = SwapZerosAndOnes(BPM)
 
-
     # Rebin 2D spectrum
     F = Flux
     E = Err
     M = BPM_alt
-
 
     nm2pix = hd_0['CDELT1']
     New_binsize_Ang = 9
@@ -75,39 +81,31 @@ for k in range(len(path)):
 
     Flux_bin = np.zeros(shape=(len(F[:,0]),N_chunk))
     Errs_bin = np.zeros(shape=(len(F[:,0]),N_chunk))
+    Qmap_bin = np.zeros(shape=(len(F[:,0]),N_chunk))
 
     #eps = 1e-40 # Softening in inverse error w_err
     for i in range(int(N_chunk)):
         # The chunks of Flux and Err, multiplied by the M (bad=0, good=1)
         F_chunk = (F[:,i*N_pix:(i+1)*N_pix])
         E_chunk = (E[:,i*N_pix:(i+1)*N_pix])
+        M_chunk = (M[:,i*N_pix:(i+1)*N_pix])
 
         for j in range(len(F[:,0])):
             # Weighted mean
-            Flux_bin[j,i], Errs_bin[j,i] = weighted_mean(F_chunk[j,:],E_chunk[j,:])
+            Flux_bin[j,i], Errs_bin[j,i], Qmap_bin[j,i] = weighted_mean(F_chunk[j,:],E_chunk[j,:],M_chunk[j,:],N_pix)
+
 
     ### Read out the fucking binned spectrum ###
-    # path_out = path
-    # file_out = name.split('.')[0]+'_wmrebin%s.fits' % (int(N_pix))
-
     path_out = path[k].replace('_NIR_corr','_NIRcorr_wmrebin%s' % int(N_pix))
 
-    if not os.path.exists(path_out):
-        # Changing the wavelength solution to a rebinnined version
-        hd_0['CRVAL1'] = hd_0['CRVAL1']+(N_pix-1)*hd_0['CDELT1']/2
-        hd_0['CDELT1'] = hd_0['CDELT1']*N_pix # CDELT1 and CD1_1 are the same
-        hd_0['CD1_1'] = hd_0['CD1_1']*N_pix
-        hd_0['NAXIS1'] = N_chunk
-        pf.writeto(path_out, Flux_bin, hd_0)
-        
-        # Read out error array
-        pf.append(path_out, Errs_bin, hd_1)
+    # Changing the wavelength solution to a rebinnined version
+    hd_0['CRVAL1'] = hd_0['CRVAL1']+(N_pix-1)*hd_0['CDELT1']/2
+    hd_0['CDELT1'] = hd_0['CDELT1']*N_pix # CDELT1 and CD1_1 are the same
+    hd_0['CD1_1'] = hd_0['CD1_1']*N_pix
+    hd_0['NAXIS1'] = N_chunk
 
-        # Read out bad pixel map
-        pf.append(path_out, BPM_alt, hd_2)
+    st.read_out_3arr_2dfits(path_out,Flux_bin,Errs_bin,Qmap_bin,hd_0,hd_1,hd_2)
 
-    else:
-        print 'file already exists'
 
 
 ###############################
@@ -119,217 +117,9 @@ for k in range(len(path)):
 
 
 
-##################################################
-### Rebin a series of spectra P93 (04.05.2016) ###
-'''
 
-target_list = ['CP-540713','CP-561356','CP-1243752','CP-1291751']
 
-New_binsize_Ang = 9
 
-
-for ii in range(len(target_list)):
-    target = target_list[ii]
-
-    path_name = glob.glob('/Volumes/DataDrive/X-shooter/P86_COSMOS_1/%s/Combined_OBs/VIS/%s_VIS_avwCombined_*xOB_sig5_V1.fits' % (target,target))[0]
-
-    # Read in Image
-    f = pf.open(path_name)
-
-    Flux = f[0].data; hd_0 = f[0].header
-    Err  = f[1].data; hd_1 = f[1].header
-    BPM  = f[2].data; hd_2 = f[2].header
-
-    # S2N  = f[4].data; hd_4 = f[4].header
-    Wave = hd_0['CRVAL1'] + (hd_0['CRPIX1'] - 1 + np.arange(hd_0['NAXIS1']))*hd_0['CDELT1'] # Aangstroem
-
-
-    # Swap 0 <-> 1 to use 
-    BPM_alt = SwapZerosAndOnes(BPM)
-
-
-    # Rebin 2D spectrum
-    F = Flux
-    E = Err
-    M = BPM_alt
-
-
-    nm2pix = hd_0['CDELT1']
-    N_pix = New_binsize_Ang/(nm2pix*10)
-
-
-    #N_pix = 60.0;# print 'Binning = %s pix (%s nm)' % (N_pix,N_pix*nm2pix)
-    N_chunk = int(np.round(len(F[0,:])/N_pix,0)); print 'N_chunk = %s' % N_chunk
-
-
-    Flux_bin = np.zeros(shape=(len(F[:,0]),N_chunk))
-    Errs_bin = np.zeros(shape=(len(F[:,0]),N_chunk))
-
-    #eps = 1e-40 # Softening in inverse error w_err
-    for i in range(int(N_chunk)):
-        # The chunks of Flux and Err, multiplied by the M (bad=0, good=1)
-        F_chunk = (F[:,i*N_pix:(i+1)*N_pix])
-        E_chunk = (E[:,i*N_pix:(i+1)*N_pix])
-
-        for j in range(len(F[:,0])):
-            # Weighted mean
-            Flux_bin[j,i], Errs_bin[j,i] = weighted_mean(F_chunk[j,:],E_chunk[j,:])
-
-
-
-
-    ### Read out the fucking binned spectrum ###
-    path_out = '/'.join(path_name.split('/')[:-1])+'/'
-    file_out = (path_name.split('/')[-1]).split('.')[0]+'_wmrebin%s.fits' % (N_pix)
-
-    print path_out+file_out
-
-    if not os.path.exists(path_out+file_out):
-        # Changing the wavelength solution to a rebinnined version
-        hd_0['CRVAL1'] = hd_0['CRVAL1']+(N_pix-1)*hd_0['CDELT1']/2
-        hd_0['CDELT1'] = hd_0['CDELT1']*N_pix # CDELT1 and CD1_1 are the same
-        hd_0['CD1_1'] = hd_0['CD1_1']*N_pix
-        hd_0['NAXIS1'] = N_chunk
-        #print hd_0['CRVAL1'],hd_0['CRPIX1'], hd_0['NAXIS1'], hd_0['CDELT1']
-        pf.writeto(path_out+file_out, Flux_bin, hd_0)
-        
-        # Read out error array
-        pf.append(path_out+file_out, Errs_bin, hd_1)
-
-        # Read out bad pixel map
-        pf.append(path_out+file_out, BPM_alt, hd_2)
-
-        # Number of Combinations
-        #pf.append(path_out+file_out, Ncombin, hd_3)
-
-        # S/N spectrum
-        S2N_new = Flux_bin/Errs_bin
-        pf.append(path_out+file_out, S2N_new, hd_0)
-
-
-    else:
-        print 'file already exists'
-
-
-'''
-
-
-
-
-
-
-##################################################
-##################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##### Old code chunks #####
-
-
-
-###############################
-##### Rebin of 1D spectra #####
-###############################
-'''
-target = 105842
-path = '/Users/mstockmann/X-Shooter/P93/%s/Combined_OBs/' % target
-
-#name = '105842_avwCombined_OBx4_sig5_V1_opt.fits'
-#name = '105842_avwCombined_OBx4_sig5_V1_rebin20_opt.fits'
-
-
-
-# Read in image
-Image = path+name
-f = pf.open(Image)
-
-Flux = f[0].data; hd_0 = f[0].header
-Err  = f[1].data; hd_1 = f[1].header
-Wave = hd_0['CRVAL1'] + (hd_0['CRPIX1'] - 1 + np.arange(hd_0['NAXIS1']))*hd_0['CDELT1'] # Angstrom
-
-
-print f.info()
-#plt.plot(Wave,Flux,'black')
-plt.plot(Wave,Err,'r')
-plt.show()
-'''
-
-
-'''
-
-#### 1 d binning ####
-nm2pix = hd_0['CDELT1']
-N_pix = 16; print 'Binning = %s pix (%s nm)' % (N_pix,N_pix*nm2pix)
-
-N_chunk = int(np.round(len(Flux)/N_pix,0)); print 'N_chunk = %s' % N_chunk
-
-
-
-Flux_bin = np.zeros(N_chunk)
-Errs_bin = np.zeros(N_chunk)
-
-eps = 0#1e-40 # Softening in inverse error w_err
-for i in range(int(N_chunk)):
-    F_chunk = Flux[i*N_pix:(i+1)*N_pix]
-    E_chunk = Err[i*N_pix:(i+1)*N_pix]
-
-    w_err = 1/(E_chunk**2+eps)
-    #w_err = w_err*10**40
-
-    Flux_bin[i] = np.sum(w_err*F_chunk)/np.sum(w_err)
-    Errs_bin[i] = 1/np.sqrt(np.sum(w_err))
-
-
-plt.plot(Flux_bin)
-plt.axis([0,1000,-2e-18,4e-18])
-plt.show()
-'''
-
-
-###############################
-###############################
 
 
 

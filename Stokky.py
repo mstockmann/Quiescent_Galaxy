@@ -48,5 +48,17 @@ def read_2d_fits(path):
     return Arr1, Arr2, Arr3, hd1, hd2, hd3
 
 
+def read_out_3arr_2dfits(path,arr1,arr2,arr3,hd1,hd2,hd3):
+    if not os.path.exists(path):
+        # Read out flux array
+        pf.writeto(path, arr1, hd1)
+        
+        # Read out error array
+        pf.append(path, arr2, hd2)
 
+        # Read out bad pixel map
+        pf.append(path, arr3, hd3)
+
+    else:
+        print 'file already exists'
 
