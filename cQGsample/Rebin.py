@@ -14,7 +14,7 @@ import os
 from scipy.optimize import curve_fit
 import sys
 
-sys.path.insert(0, '../..')
+sys.path.insert(0, '../')
 import Stokky as st
 
 ####################################################
@@ -62,8 +62,7 @@ def make_header_rebin(hd,binsize,Nbins):
 ##### Rebin a single 2D spectrum  #####
 #######################################
 
-
-path = glob.glob('../../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIR_corr.fits')
+path = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIR_corr.fits')
 
 for k in range(len(path)):
     print 'Object: %s' % path[k].split('/')[-1].split('_')[0]
@@ -107,7 +106,7 @@ for k in range(len(path)):
 
 
     # ### Read out the fucking binned spectrum ###
-    path_out = path[k].replace('_NIR_corr','_NIRcorr_wmrebin%s' % int(N_pix))
+    path_out = path[k].replace('_NIR_corr','_NIRcorr_wmrebin%s_test' % int(N_pix))
 
 
     
@@ -116,7 +115,7 @@ for k in range(len(path)):
     hd_2 = make_header_rebin(hd_2,N_pix,N_chunk)
 
     st.read_out_3arr_2dfits(path_out,Flux_bin,Errs_bin,Qmap_bin,hd_0,hd_1,hd_2)
-    # raise
+    raise
 
 
 ###############################

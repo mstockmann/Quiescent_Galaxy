@@ -60,5 +60,22 @@ def read_out_3arr_2dfits(path,arr1,arr2,arr3,hd1,hd2,hd3):
         pf.append(path, arr3, hd3)
 
     else:
+        os.system('rm %s' % path)
+        # Read out flux array
+        pf.writeto(path, arr1, hd1)
+        
+        # Read out error array
+        pf.append(path, arr2, hd2)
+
+        # Read out bad pixel map
+        pf.append(path, arr3, hd3)
         print 'file already exists'
+
+
+def convert_2_rest_frame(W,F,E,z):
+    W_rest_frame = W / (1+z)
+    F_rest_frame = F * (1+z)
+    E_rest_frame = E * (1+z)
+    return W_rest_frame, F_rest_frame, E_rest_frame
+
 
