@@ -151,74 +151,24 @@ for ii in range(len(N_spec)):
     # Visual confirm the PSF range
     PSF, r1, r2 = _plot_Wavelength_Collapsed_Spectrum(Flux,klim)
 
-
-    # print PSF
-    # raise
-    # Selecting the psf of the data:
     Flux_psf = Flux[r1:r2,:]
     Err_psf  = Err[r1:r2,:]
     BPM_psf  = BPM[r1:r2,:]
-
-    # print PSF
-    # print BPM_psf,Flux_psf,PSF,Err_psf
-    # raise
-
-
 
     # Optimal Extract (Horne et al.)
     F_opt, E_opt, M_opt = optext(BPM_psf,Flux_psf,PSF,Err_psf)
 
 
-    plt.plot(Wave,F_opt)
+    plt.plot(Wave,F_opt,'b')
     plt.show()
-
-
-    # Remove unphysical S/N values
-    S2N_after = F_opt/E_opt
-    S2n_limit = 100
-
-    ID = np.where(abs(S2N_after) > S2n_limit)[0]
-
-    F_opt_s2ncorr = np.array(F_opt)
-    E_opt_s2ncorr = np.array(E_opt)
-
-    k0 = 0
-    k1 = 0
-    k2 = 0
-    k3 = 0
-    for i in range(len(ID)):
-        if 5*np.median(F_opt) < abs(F_opt[ID[i]]):
-            F_opt_s2ncorr[ID[i]] = np.median(F_opt)
-            k0 += 1
-            if F_opt_s2ncorr[ID[i]]/E_opt_s2ncorr[ID[i]] > S2n_limit:
-                E_opt_s2ncorr[ID[i]] = np.median(E_opt)
-                k3 += 1
-
-        elif abs(E_opt[ID[i]]) < 1/5*np.median(E_opt):
-            E_opt_s2ncorr[ID[i]] = np.median(E_opt)
-            k1 += 1
-        
-        else:
-            F_opt_s2ncorr[ID[i]] = np.median(F_opt)
-            E_opt_s2ncorr[ID[i]] = np.median(E_opt)
-            k2 += 1
-    # print k0,k3,k1,k2, len(ID)
-
-
-    F_opt = np.array(F_opt_s2ncorr)
-    E_opt = np.array(E_opt_s2ncorr)
-
 
 
     F_opt = F_opt/Norm_const
     E_opt = E_opt/Norm_const
 
     # Read out the optimal extracted spectrum
-    path_out = Path_2d_spec[ii].replace('.fits','_opt_test.fits')
+    path_out = Path_2d_spec[ii].replace('.fits','_opt.fits')
     print path_out
-
-
-
 
     if not os.path.exists(path_out):
         # Read out
@@ -226,98 +176,14 @@ for ii in range(len(N_spec)):
         pf.append(path_out, E_opt, hd_1)
         pf.append(path_out, M_opt, hd_2)
     else:
-        os.system('rm %s' % path_out)
+        os.system('mv %s %s' % (path_out,path_out.replace('.fits','_old.fits')))
         # Read out
         pf.writeto(path_out, F_opt, hd_0)
         pf.append(path_out, E_opt, hd_1)
         pf.append(path_out, M_opt, hd_2)
 
         print 'file already exists'
-    raise
-
-    # # S2n_array = Flux_psf/Err_psf
-    # # for i in range(len(S2n_array)):
-    # #     plt.scatter(i,np.median(S2n_array[i,:]))
-
-    # # S2n_opt_m = np.median(F_opt/E_opt)
-    # # plt.scatter(10,S2n_opt_m,color='r')
-    # # plt.show()
-
-    # N_bin = 50
-    # F_opt_bin = np.zeros(len(F_opt)/N_bin)
-    # E_opt_bin = np.zeros(len(F_opt)/N_bin)
-    # W_bin = np.zeros(len(Wave)/N_bin)
-    # for i in range(int(len(F_opt)/N_bin)):
-    #     F_opt_bin[i] = np.median(F_opt[i*N_bin:(i+1)*N_bin])
-    #     W_bin[i] = Wave[(i+1)*N_bin/2]
-    # plt.plot(W_bin,F_opt_bin)
-    # plt.show()
-
-
-    # plt.figure(2)
-    # plt.plot(Wave[::10], F_opt[::10])
-    # plt.show()
-
-
-
-'''
-
-
-
-# Test
-S2N_after = F_opt/E_opt
-ID = np.where(abs(S2N_after) > S2n_limit)[0]
-print 'ID len: %s' % len(ID)
-x = np.arange(len(S2N_after))
-
-plt.plot(S2N_after,color='r')
-plt.scatter(x[ID],S2N_after[ID],color='b')
-plt.show()
-'''
-
-
-
-
-# # Plot
-
-# ###
-# plt.figure(figsize=(18,3))
-
-# #rect_2D = [10,10,10,10]
-# #rect_1D = [left_h, bottom, 0.17, height]
-
-# plt.subplot(2,1,1)
-# #plt.axes(rect_2D)
-
-# # Filps the image?
-# plt.imshow(Flux, vmin=-1e-19, vmax=5e-19,cmap='gray',origin='lower')
-# #, aspect='auto'
-# plt.subplot(2,1,2)
-# plt.plot(Wave,F_opt)
-# plt.axis([min(Wave),max(Wave),-0.01e-18,3e-18])
-# plt.show()
-
-
-
-
-# ### Remember to rescale
-
-# F_opt = F_opt/Norm_const
-# E_opt = E_opt/Norm_const
-
-# # Read out the optimal extracted spectrum
-# path_out = Path_2d_spec[i].replace('.fits','_opt.fits')
-
-
-# if not os.path.exists(path_out):
-#     # Read out flux array
-#     pf.writeto(path_out, F_opt, hd_0)
-    
-#     # Read out error array
-#     pf.append(path_out, E_opt, hd_1)
-# else:
-#     print 'file already exists'
-
+    # raise
 
 
 

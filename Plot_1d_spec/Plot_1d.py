@@ -45,24 +45,20 @@ def load_spec_z(path,obj):
 #### 2D spectra ####
 ####################
 
+Path_2d_spec_new = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15_opt.fits')
 
 
-
-
-
-
-Path_2d_spec = glob.glob('../../X-shooter/cQGsample/Objects/105842/NIR_corr/105842_avwCombined_OBx4_sig5_V1_NIRcorr_wmrebin15_opt_test.fits')
-# Path_2d_spec = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15_opt.fits')
-
-# print Path_2d_spec
-# raise
+Path_2d_spec_old = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15_opt_old.fits')
+print len(Path_2d_spec_new), len(Path_2d_spec_old) 
+raise
 
 
 i = 0
 target = Path_2d_spec[i].split('/')[-1].split('_')[0]
 z_spec = load_spec_z('../../X-shooter/cQGsample/Collected_info/z_spec.txt','540713')
 
-Wave, Flux, Errs, hdf_nir, hde_nir = read_in_1d_fits(Path_2d_spec[i])   
+W_new, F_new, E_new, hdf_new, hde_new = read_in_1d_fits(Path_2d_spec_new[i])   
+Wave, Flux, Errs, hdf_nir, hde_nir = read_in_1d_fits(Path_2d_spec_old[i])       
 
 Wave_rf, F_rf, E_rf = st.convert_2_rest_frame(Wave, Flux, Errs, z_spec)
 
