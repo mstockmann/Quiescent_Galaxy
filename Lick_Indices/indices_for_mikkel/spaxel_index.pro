@@ -24,9 +24,6 @@
 ;;  Minor changes and a bit of clean-up to use with CALIFA
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;@/Users/gallazzi/CALIFA/programs/integral.pro
-@/Users/gallazzi/CALIFA/programs/quad_integral.pro
-@/Users/gallazzi/CALIFA/programs/sp_lineindex.pro
 
 pro read_idxinfo
     common idxinfo,indexpars

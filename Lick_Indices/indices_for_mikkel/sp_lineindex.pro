@@ -15,7 +15,7 @@
 ;;;     and stored
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@/Users/gallazzi/CALIFA/programs/quad_integral.pro
+@quad_integral.pro
 
 ;*******************************************************************************
 function lineindex, wave, flux, err, indexinfo, w, f_blue_cont = f_blue_cont, $

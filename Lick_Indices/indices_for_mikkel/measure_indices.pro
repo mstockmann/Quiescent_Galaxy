@@ -1,58 +1,32 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 5/9/2015
 ;;
-;; Measure indices on final reduction from Johannes
-;; nodding_macs2129_full_nir_9.6.main_box.dat
-;; spectrum already corrected for gal.ext. and for slitloss (but still need match to phot)
+;; 14 cQG sample:
+;; Measure indices on final reduction from Mikkel
+;; spectrum needs correction for slitloss and match to phot
 ;; spectrum not corrected for emission lines (OIII)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 pro measure_indices_new_redux
     common idxinfo
-    DIR='MACS2129/'
+    DIR='test_spectrum/'
 
-    file=DIR+'uvb_vis_nir/nodding_macs2129_full_nir_9.6.main_box.dat'
+    file=DIR+'108899_avwCombined_OBx5_sig5_V1_NIRcorr_wmrebin15_opt.dat'
     str={lambda:fltarr(1),flux:fltarr(1),err:fltarr(1),qual:intarr(1)}
-    nlambda=file_line(file)
+    nlambda=file_lines(file)
     data=replicate(str,nlambda)
     openr,lun,file,/get_lun
     readf,lun,data
     free_lun,lun
-;*** Put wavelength in air
+;;; Put wavelength in air
     vactoair,data.lambda
 
-;    file=DIR+'MACS2129-2_opt_3sigma_10iter_helvelcorr.rebin16.1dopt.gaussprofile.galext.txt'
-;    nlambda=file_line(file)
-;    str={lambda:fltarr(1),flux:fltarr(1),err:fltarr(1)}
-;    data=replicate(str,nlambda)    
-;    openr,lun,file,/get_lun
-;    readf,lun,data
-;    free_lun,lun
-    
-    zgal=2.1489
-    
-;    file_clash=DIR+'/CLASH/cat_IRseg.txt'
-;    readcol,file_clash, id,RA,Dec
+    zgal=2.2292
+    normalisation = 1.e18
 
-;    ; correct spectrum for galactic extinction
-;    dustdir='/Users/gallazzi/idl/idl_jarle/IDL/SFD_Dust_Maps/maps/'
-;    glactc,RA,Dec,2000.,lgal,bgal,1,/degree
-;    e_bv_sfd=dust_getval(lgal,bgal,ipath=dustdir,/interp)
-;    A_v=3.1*e_bv_sfd
-;    airwl=data.lambda[0]
-;    vactoair, airwl
-;    a_odonnell=ext_odonnell(airwl,3.1)
-;    e_tau=exp(a_odonnell*A_v/1.086)
-;    drflux=data.flux[0]*e_tau
-;    drerror=data.err[0]*e_tau
-;    openw,lun,DIR+'MACS2129-2_opt_3sigma_10iter_helvelcorr.rebin16.1dopt.gaussprofile.galext.txt',/get_lun
-;    for i=0,nlambda-1 do begin	
-;    	printf,lun,format='(e15.4,e15.4,e15.4)',data[i].lambda,drflux[i],drerror[i]
-;    endfor
-;    free_lun,lun
-    
     lambda_res1=data.lambda[0]/(1.+zgal)
-    flux1=data.flux[0]*1.e18
-    error1=data.err[0]*1.e18
+    flux1=data.flux[0]*normalisation
+    error1=data.err[0]*normalisation
     
     ; Define these if indices are measured on original spectrum
     ;lambda_res=lambda_res1
@@ -69,144 +43,57 @@ pro measure_indices_new_redux
 
 ;;;; Spectrum corrected for emission lines from gandalf (Stefano)
     ; Total spectrum
-    ;file_spec=DIR+'uvb_vis_nir/nodding_macs2129_full_nir_9.6.main_box_GNDF_stellar.fits'
-    ; Central spectrum
-    ;file_spec=DIR+'uvb_vis_nir/oned_forgrad/MACS2129-2_nir_master_stack_opt_3sigma_5iter_allcor.rebin16.opt.centerforgrad_box.1d_GNDF_stellar.fits'
-    ;outfile=DIR+'uvb_vis_nir/oned_forgrad/Lick_indices.centerforgrad.GNDF_stellar.dat'
-    ; Outer spectrum
-    ;file_spec=DIR+'uvb_vis_nir/oned_forgrad/MACS2129-2_nir_master_stack_opt_3sigma_5iter_allcor.rebin16.opt.outerforgrad_box.1d_GNDF_stellar.fits'
-    ;outfile=DIR+'uvb_vis_nir/oned_forgrad/Lick_indices.outerforgrad.GNDF_stellar.dat'
-    ; Lower spectrum
-    ;file_spec=DIR+'uvb_vis_nir/oned_forgrad/MACS2129-2_nir_master_stack_opt_3sigma_5iter_allcor.rebin16.opt.lowerforgrad_box.1d_GNDF_stellar.fits'
-    ;outfile=DIR+'uvb_vis_nir/oned_forgrad/Lick_indices.lowerforgrad.GNDF_stellar.dat'
-    ; Upper spectrum
-    file_spec=DIR+'uvb_vis_nir/oned_forgrad/MACS2129-2_nir_master_stack_opt_3sigma_5iter_allcor.rebin16.opt.upperforgrad_box.1d_GNDF_stellar.fits'
-    outfile=DIR+'uvb_vis_nir/oned_forgrad/Lick_indices.upperforgrad.GNDF_stellar.dat'
+    ; !!!!!!!!!!!!!!!!!!!!! Does the array length need to be similar to start spectrum????
+;    file_spec=DIR+'108899_avwCombined_OBx5_sig5_V1_NIRcorr_wmrebin15_opt.dat'
+    outfile=DIR+'Lick_indices.108899_avwCombined_OBx5_sig5_V1_NIRcorr_wmrebin15_opt.dat'
             
-    stellar=mrdfits(file_spec,0,hdr)
-    lnlambda0=sxpar(hdr,'CRVAL3')
-    pix0=sxpar(hdr,'CRPIX3')
-    lndlambda=sxpar(hdr,'CDELT3')
-    nlnlambda=sxpar(hdr,'NAXIS3')
-    lnlambda=lnlambda0+(findgen(nlnlambda)-(pix0-1))*lndlambda
-    elambda=exp(lnlambda)
+;    stellar=mrdfits(file_spec,0,hdr)
+;    lnlambda0=sxpar(hdr,'CRVAL3')
+;    pix0=sxpar(hdr,'CRPIX3')
+;    lndlambda=sxpar(hdr,'CDELT3')
+;    nlnlambda=sxpar(hdr,'NAXIS3')
+;    lnlambda=lnlambda0+(findgen(nlnlambda)-(pix0-1))*lndlambda
+;    elambda=exp(lnlambda)
 ;;;;; Now interpolate stellar spectrum onto original lambda array
-    linterp,elambda,reform(stellar),lambda_res1,rstellar    
+;    linterp,elambda,reform(stellar),lambda_res1,rstellar
 ;;;;; Use resampled stellar spectrum for NIR part
     lambda_res=lambda_res1
-    flux=rstellar*1.e18 ; 1.e-18 erg/cm2/s/AA 
+;    flux=rstellar*normalisation ; normalisation = 1.e-18 erg/cm2/s/AA
+    flux=flux1
     error=error1
     
     set_plot,'x'
     device,decompose=0
     loadct,13
-    tmp=get_position_arr(0,nx=1,ny=2,xmin=0.1,xmax=0.9,ymin=0.1,ymax=0.9,ygap=0)
-    pos=get_position_arr(0)
+    ;tmp=get_position_arr(0,nx=1,ny=2,xmin=0.1,xmax=0.9,ymin=0.1,ymax=0.9,ygap=0)
+    pos=[0.1,0.1,0.9,0.9]
     plot,lambda_res,flux,xstyle=1,ystyle=1,position=pos,yrange=[0.,12.],xrange=[3700.,5500.]
     oplot,lambda_res,error,color=100
 ;    oplot,lambda_res1,flux1,color=200
 ;    oplot,lambda_res1,error1,color=160
-    pos=get_position_arr(1)
-    plot,lambda_res,flux/error,xstyle=1,ystyle=1,position=pos,/noerase,xrange=[3700.,5500.]
-    stop
-    
+    ;pos=get_position_arr(1)
+    ;plot,lambda_res,flux/error,xstyle=1,ystyle=1,position=pos,/noerase,xrange=[3700.,5500.]
+    plot,lambda_res,flux/error,xstyle=1,ystyle=1,/noerase,xrange=[3700.,5500.]
+    ;stop
+
     
     ;measure_idx,flux,error,lambda_res,DIR+'Lick_indices.rebin16.gaussprofile.stellar.dat'
     
 ;    measure_idx2,flux,error,lambda_res,DIR+'Lick_indices.rebin16.gaussprofile.stellar.v2.dat'
     ;measure_idx2,flux,error,lambda_res,DIR+'uvb_vis_nir/Lick_indices.nodding_macs2129_full_nir_9.6.main_box_GNDF_stellar.dat'
     
-    measure_idx2,flux,error,lambda_res,outfile
-    
+;    measure_idx2,flux,error,lambda_res,outfile
+    measure_idx2,flux1,error,lambda_res,outfile
     
 end
 
-pro measure_idx,flux,err,lambda,fileidx_out
-    common idxinfo
-    
-    ok=where(flux gt -90. and err gt 0. and err lt 100. and finite(flux) and finite(err),nok)
-    ;; Measure absorption indices
-    lidx=fltarr(2,34)
-    nameidx=strarr(34)
-    oki=where(indexpars.blue_continuum[0] ge min(lambda[ok]) and $
-    	indexpars.red_continuum[1] le max(lambda[ok]) and (strcmp(indexpars.index,'Lick',4) eq 1 $
-	or strcmp(indexpars.index,'H8',2) eq 1 or strcmp(indexpars.index,'H9',2) eq 1 $
-	or strcmp(indexpars.index,'BH_HK',5) eq 1),noki)
-    print,noki
-    for j=0,noki-1 do begin
-    	print,'processing index ',indexpars[oki[j]].index
-	nameidx[oki[j]]=indexpars[oki[j]].index
-    	wi=(indexpars[oki[j]].blue_continuum[0]-3.) < max(lambda[ok[where(lambda[ok] lt indexpars[oki[j]].blue_continuum[0])]])
-    	wf=(indexpars[oki[j]].red_continuum[1]+3.) > min(lambda[ok[where(lambda[ok] gt indexpars[oki[j]].red_continuum[1])]])
-	;allow for missing pixels (5 = 10A)
-	locali=where(lambda[ok] gt (wi-10.) and lambda[ok] lt (wf+10.))
-	if (locali[0] ne -1) then begin
-	    if (indexpars[oki[j]].blue_continuum[0] ge min(lambda[ok[locali]]) and $
-    	    	indexpars[oki[j]].red_continuum[1] le max(lambda[ok[locali]])) then begin
-		lickidx=Lick(oki[j],indexpars,lambda[ok[locali]],flux[ok[locali]],err[ok[locali]])
-    	    	lidx[0,oki[j]]=lickidx[0] & lidx[1,oki[j]]=lickidx[1]
-	    endif else $
-	    	print,'index outside wavelentgh range'
-	endif
-    endfor
-		
-    if (min(lambda[ok]) le 3850.) then begin
-       	d4000_n = d4000(lambda[ok], flux[ok], err[ok], /narrow,redside=r_d4000, blueside=b_d4000)
-	lidx[0,28]=d4000_n[0] & lidx[1,28]=d4000_n[1]
-	print,'D4',d4000_n
-	nameidx[28]='D4000_n'
-    endif
-    
-    print,'D4000: ',lidx[0,28],' pm ',lidx[1,28]
-    print,'Hdelta: ',lidx[0,21],' pm ',lidx[1,21]
-    print,'Hgamma: ',lidx[0,22],' pm ',lidx[1,22]
-    print,'Hbeta: ',lidx[0,8],' pm ',lidx[1,8]
-    
-    ; Measure also composite indices
-    ; [Mg1Fe] = 0.6*Mg1 + 0.4*alog10(Fe4531+Fe5015)
-    ; [Mg2Fe] = 0.6*Mg2 + 0.4*alog10(Fe4531+Fe5015)
-    ; [MgFe]' = sqrt(Mgb*(0.72*Fe5270 + 0.28*Fe5335))
-    ; Mgb/<Fe> = Mgb / (0.5*(Fe5270 + Fe5335))
-    ; Hd_Hg= Hdelta_A+Hgamma_A
-    nameidx[29]='Mg1Fe'
-    lidx[0,29]= 0.6*lidx[0,10] + 0.4*alog10(lidx[0,6]+lidx[0,9])
-    lidx[1,29]= (0.4/(alog(10)*(lidx[0,6]+lidx[0,9])))^2.
-    lidx[1,29]=sqrt(lidx[1,29]*((lidx[1,6])^2.+(lidx[1,9])^2.)+(0.6*lidx[1,10])^2.)
-    nameidx[30]='Mg2Fe'
-    lidx[0,30]= 0.6*lidx[0,11] + 0.4*alog10(lidx[0,6]+lidx[0,9])
-    lidx[1,30]= (0.4/(alog(10)*(lidx[0,6]+lidx[0,9])))^2.
-    lidx[1,30]=sqrt(lidx[1,30]*((lidx[1,6])^2.+(lidx[1,9])^2.)+(0.6*lidx[1,11])^2.)
-    nameidx[31]='MgFe_prime'
-    lidx[0,31]=sqrt(lidx[0,12]*(0.72*lidx[0,13]+0.28*lidx[0,14]))
-    lidx[1,31]=(lidx[1,12]/lidx[0,12])^2.+((0.72*lidx[1,13])^2.+ $
-    	(0.28*lidx[1,14])^2.)/(0.72*lidx[0,13]+0.28*lidx[0,14])^2.
-    lidx[1,31]=0.5*lidx[0,31]*sqrt(lidx[1,31])
-    nameidx[32]='Mg_Fe'
-    lidx[0,32]=lidx[0,12]/(0.5*(lidx[0,13]+lidx[0,14]))
-    lidx[1,32]=(lidx[1,12]/lidx[0,12])^2.+(lidx[1,13]^2.+lidx[1,14]^2.)/(lidx[0,13]^2.+lidx[0,14]^2.)
-    lidx[1,32]=lidx[0,32]*sqrt(lidx[1,32])
-    nameidx[33]='Hd_Hg'
-    lidx[0,33] = lidx[0,21]+lidx[0,22]
-    lidx[1,33] = sqrt(lidx[1,21]^2.+lidx[1,22]^2.)
-
-    openw,lun,fileidx_out,/get_lun
-    for i=0,22 do printf,lun,format='(2(1x,f10.4),2x,A)',lidx[0:1,i],nameidx[i] 
-    for i=25,26 do printf,lun,format='(2(1x,f10.4),2x,A)',lidx[0:1,i],nameidx[i] 
-    for i=28,33 do printf,lun,format='(2(1x,f10.4),2x,A)',lidx[0:1,i],nameidx[i] 
-    free_lun,lun
-    
-    
-    stop
-    
-end
 
 pro read_idxinfo
     common idxinfo,indexpars
 ;------------------------------------------------------------------------------
 ; Read info about indices - store in common block
 ;------------------------------------------------------------------------------
-    ;indexlist='/Users/gallazzi/idl/idl_jarle/IDL/platefit/etc/indexlist.txt'
-    indexlist='/Users/gallazzi/Sune_SEEDS/Xshooter_spectrum/programs/indexlist.txt'
+    indexlist='indexlist.txt'
     readcol, indexlist, index, wli, wlf, bc_wli, bc_wlf, rc_wli, rc_wlf, units, $
 	format = 'A,F,F,F,F,F,F,A', /silent
 
@@ -403,8 +290,7 @@ function d4000_models, wl, flux, narrow = narrow, redside=fl_r, blueside=fl_b
 
 end
 
-;.compile /Users/gallazzi/CALIFA/programs/spaxel_index.pro
-;.compile /Users/gallazzi/CALIFA/programs/sp_lineindex.pro
+
 pro measure_idx2,flux,err,lambda,fileidx_out
     common idxinfo
 
