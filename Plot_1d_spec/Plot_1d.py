@@ -46,7 +46,7 @@ def load_spec_z(path,obj):
 ####################
 #### 2D spectra ####
 ####################
-
+'''
 Path_2d_spec_new = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15_opt.fits')
 
 
@@ -57,7 +57,7 @@ for i in range(len(Path_2d_spec_new)):
 
     target = Path_2d_spec_new[i].split('/')[-1].split('_')[0]
     z_spec = load_spec_z('../../X-shooter/cQGsample/Collected_info/z_spec.txt',target)
-    # z_spec = 2.69
+    print z_spec
     W_new, F_new, E_new, hdf_new, hde_new = read_in_1d_fits(Path_2d_spec_new[i])   
     W_old, F_old, E_old, hdf_old, hde_old = read_in_1d_fits(Path_2d_spec_old[i])       
 
@@ -96,6 +96,13 @@ for i in range(len(Path_2d_spec_new)):
     plt.axis([min(W_new_rf)-500,max(W_new_rf)+500,-0.4e-17, 1.8e-17])
     plt.show()
     
+'''
+
+
+####################
+
+
+path = '/Users/mstockmann/PhD_DARK/Data/X-shooter/cQGsample/Spectra/Stefano_BPM_update/105842_avwCombined_OBx4_sig5_V1_NIRcorr_wmrebin15_opt_bpm.fits'
 
 
 
