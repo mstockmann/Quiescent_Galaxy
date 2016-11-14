@@ -373,6 +373,6 @@ pro measure_idx2,flux,err,lambda,fileidx_out
     free_lun,lun
     
     
-    stop
+    ;stop
     
 end

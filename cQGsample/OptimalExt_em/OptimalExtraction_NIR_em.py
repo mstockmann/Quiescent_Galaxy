@@ -12,7 +12,10 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import os
 from scipy.optimize import curve_fit
+import sys
 
+sys.path.insert(0, '../..')
+import Stokky as st
 
 ####################################################
 
@@ -117,27 +120,32 @@ def _plot_Wavelength_Collapsed_Spectrum(F,psf):
 ##### Optimal Extraction (Horne et al.) #####
 #############################################
 
+### What do we do with these?
+# UV-171687 - Double peak, how to deblend?
+# UV-250513 - Double trace (not clear peaks). Deblend or subtract as single
+# CP-561356 - Double peak, how to deblend?
 
 ####################
 #### 2D spectra ####
 ####################
 
 
-N_spec = glob.glob('../../X-shooter/cQGsample/Objects/*')
-#Path_2d_spec = glob.glob('../../../X-shooter/P93/Data/Reduction/*/Combined_OBs/NIR_corr/*_V1_NIR_corr.fits')
+# N_spec = glob.glob('../../../X-shooter/cQGsample/Objects/*')
+# #Path_2d_spec = glob.glob('../../../X-shooter/P93/Data/Reduction/*/Combined_OBs/NIR_corr/*_V1_NIR_corr.fits')
 
-Path_2d_spec = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15.fits')
+Path_2d_spec = glob.glob('../../../X-shooter/cQGsample/Spectra_analysis/1-2drebin_emission_rm/*_V1_NIRcorr_wmrebin15_er2d.fits')
+# print len(Path_2d_spec)
+# raise
 
 klim_list = [[27, 48],[25, 48],[25, 47],[28, 45],[23, 48],[25, 50],[26, 49],[28, 49],[31, 49],[26, 50],[27, 44],[27, 44],[27, 44],[27, 44]]
 
 
 
-
 rebin = 0 # 0: not rebinned, 1: rebinned
 Norm_const = 1 # normalise the spectrum F_norm = F*Norm_const
-for ii in range(len(N_spec)):
+for ii in range(len(Path_2d_spec)):
     # ii=1
-    print 'Target: %s' % Path_2d_spec[ii].split('/')[6]
+    print 'Target: %s' % Path_2d_spec[ii].split('/')[-1].split('_')[0]
 
     klim = klim_list[ii]
 
@@ -166,25 +174,26 @@ for ii in range(len(N_spec)):
     F_opt = F_opt/Norm_const
     E_opt = E_opt/Norm_const
 
-    raise
     # Read out the optimal extracted spectrum
-    path_out = Path_2d_spec[ii].replace('.fits','_opt.fits')
+
+    path_out = Path_2d_spec[ii].replace('.fits','_opt.fits').replace('1-2drebin_emission_rm','2-OptimalExt_er')
     print path_out
 
-    if not os.path.exists(path_out):
-        # Read out
-        pf.writeto(path_out, F_opt, hd_0)
-        pf.append(path_out, E_opt, hd_1)
-        pf.append(path_out, M_opt, hd_2)
-    else:
-        os.system('mv %s %s' % (path_out,path_out.replace('.fits','_old.fits')))
-        # Read out
-        pf.writeto(path_out, F_opt, hd_0)
-        pf.append(path_out, E_opt, hd_1)
-        pf.append(path_out, M_opt, hd_2)
+    st.read_out_1d_fits(path_out, F_opt, E_opt, M_opt, hd_0, hd_1, hd_2)
+    # if not os.path.exists(path_out):
+    #     # Read out
+    #     pf.writeto(path_out, F_opt, hd_0)
+    #     pf.append(path_out, E_opt, hd_1)
+    #     pf.append(path_out, M_opt, hd_2)
+    # else:
+    #     os.system('mv %s %s' % (path_out,path_out.replace('.fits','_old.fits')))
+    #     # Read out
+    #     pf.writeto(path_out, F_opt, hd_0)
+    #     pf.append(path_out, E_opt, hd_1)
+    #     pf.append(path_out, M_opt, hd_2)
 
-        print 'file already exists'
-    # raise
+    #     print 'file already exists'
+
 
 
 

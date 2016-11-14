@@ -14,8 +14,11 @@ from scipy.optimize import curve_fit
 import sys
 from cardelli_unred import cardelli_reddening
 
+# sys.path.insert(0, '../..')
+# from Stokky import *
+
 sys.path.insert(0, '../..')
-from Stokky import *
+import Stokky as st
 
 ####################################################
 
@@ -50,9 +53,75 @@ def correct_for_dust(wavelength, ra, dec):
 	# from extinction import reddening
 	return reddening(wavelength* u.angstrom, av, r_v=r_v, model='ccm89'), ebv
 
+
+def read_phot_cat(path):
+	data = np.genfromtxt(path)
+
+	id = data[:,0]
+	Uf = data[:,1]
+	Ue = data[:,2]
+	Bf = data[:,3]
+	Be = data[:,4]
+	Vf = data[:,5]
+	Ve = data[:,6]
+	Rf = data[:,7]
+	Re = data[:,8]
+	If = data[:,9]
+	Ie = data[:,10]
+	zf = data[:,11]
+	ze = data[:,12]
+	Yf = data[:,13]
+	Ye = data[:,14]
+	Jf = data[:,15]
+	Je = data[:,16]
+	Hf = data[:,17]
+	He = data[:,18]
+	Kf = data[:,19]
+	Ke = data[:,20]
+	Ktf = data[:,21]
+	Kte = data[:,22]
+	Phot_list = [Uf, Ue, Bf, Be, Vf, Ve, Rf, Re, If, Ie, zf, ze, Yf, Ye, Jf, Je, Hf, He, Kf, Ke, Ktf, Kte]
+	return Phot_list
+
+
+def read_filter_curves(name,filter_names):
+	""" Output: [no_filter],[row],[column], column: [0]: No.row, [1]:lambda/A, [2]: Transmission curve
+	"""
+
+
+	f = open(name,'r')
+	files = f.read().split('\n')
+	QSO_files = []
+	for i in range(len(files)-1):# -1 as there is a \n in the last entry
+	    k = files[i].split('\t')
+	    k_list = k[0].split(' ',8)
+	    k_list = filter(lambda x: len(x)>0, k_list)
+	    tmp = []
+	    if k_list[1] in filter_names:
+	        filter_len = int(k_list[0])
+	        for j in range(filter_len):
+	            k_tmp = files[i+j+1].split('\t')
+	            k_list_tmp = k_tmp[0].split(' ',8)
+	            k_list_tmp = filter(lambda x: len(x)>0, k_list_tmp)
+	            k_list_tmp = map(float,k_list_tmp)
+	            tmp.append(k_list_tmp)
+	        QSO_files.append(tmp)
+	        #print len(QSO_files)
+	return np.array(QSO_files)
+
+def pair_transmission_with_spec(Wspec,Wtrans,Trans):
+	ID_wave = np.searchsorted(Wtrans,Wspec)
+	WH_syn = Wtrans[ID_wave]
+	TH_syn = Trans[ID_wave]
+	return WH_syn, TH_syn
+
+
 ####################################################
 
 
+###############################
+### de-reddening of spectra ###
+'''
 path_NIR_VIS = glob.glob('../../../X-shooter/cQGsample/Objects/*/VIS_NIR_Banana/*_rebin0.9nm_opt_V1.fits')
 
 
@@ -65,20 +134,136 @@ for i in range(len(path_NIR_VIS)):
 
 	Reddening, ebv = correct_for_dust(W, np.float(hdf['ra']), np.float(hdf['dec']))
 	Fcorr = cardelli_reddening(W, F, ebv)
+	raise
+'''
+###############################
 
 
+
+################################
+### Make slitloss correction ###
+
+# NIR+VIS
+# Spec_path = glob.glob('../../../X-shooter/cQGsample/Objects/*/VIS_NIR_Banana/*_rebin0.9nm_opt_V1.fits')
+
+# NIR 2d emission corrected
+Spec_path = glob.glob('../../../X-shooter/cQGsample/Spectra_analysis/2-OptimalExt_er/*_V1_NIRcorr_wmrebin15_er2d_opt.fits')
+
+
+
+Phot_path = glob.glob('../../../Quiescent_Galaxy/FAST/Photometric_Cat/Output/PhotCat_xsh_all_V1_cgsA_NoSPLASH.cat')
+
+Trans_path = glob.glob('../../../../Programs/FAST/COSMOS_filters/FILTER.RES.SWv5.R300.txt')
+
+
+
+# read in photometry
+Photometric_list = read_phot_cat(Phot_path[0])
+Hcolf = Photometric_list[16]
+Kcolf = Photometric_list[18]
+Ktotf = Photometric_list[20]
+
+
+# Read in the filter curves
+data_filter = read_filter_curves(Trans_path[0],'UltraVISTA/H_ultravista_qe_atm.bp')
+W_Hspec = np.array(data_filter[0,:,1])
+T_Hspec = np.array(data_filter[0,:,2])
+
+
+for ii in range(len(Spec_path)):
+
+
+
+	# read in spec - change when bpm is included in 1d nir+vis
+	# data_arr = pf.open(Spec_path[0])
+	# hdf = data_arr[0].header
+	# hde = data_arr[1].header
+	# F = data_arr[0].data#/np.median(data_arr[0].data)
+	# E = data_arr[1].data#/np.median(data_arr[0].data)
+	# W = (hdf['CRVAL1'] + (hdf['CRPIX1'] - 1 + np.arange(hdf['NAXIS1']))*hdf['CDELT1'])*10 
+
+	W, F, E, M, hdf, hde, hdm = st.read_in_1d_fits(Spec_path[0])
+
+	# pair transmission with spec arr
+	WH_pair, TH_pair = pair_transmission_with_spec(W,W_Hspec,T_Hspec)
+
+
+	# plt.plot(W,F,color='black')
+	# plt.plot(WH_pair,TH_pair,color='r')
+	# plt.show()
+
+	# make synthetic mag
+	H_synthetic = np.sum(F*TH_pair)/np.sum(TH_pair)
+
+
+	# make slit loss and aperture corrections to the flux spec
+	corr_aperture = Ktotf[ii]/Kcolf[ii]
+
+	corr_slitloss = Hcolf[ii]*corr_aperture/H_synthetic
+	print corr_slitloss, corr_aperture
+
+	F_corr = F*corr_slitloss#*corr_aperture
 
 	
+	Lam_band_av = np.array([3562,4458,5477,6186,7506,8962,10200,12520,16450,21470])
+
+	Phot_F_target = np.zeros(10)
+	Phot_E_target = np.zeros(10)
+	for uu in range(10):
+		Phot_F_target[uu] = Photometric_list[uu*2][ii]
+		Phot_E_target[uu] = Photometric_list[uu*2+1][ii]
+
+
+	# print len(Photometric_list)
+	# raise
+
+	# print Photometric_list[::2]
+	# print Lam_band_av
+	# raise
+
+	
+	plt.plot(W,F,color='black')
+	plt.plot(W,F_corr,color='red')
+	plt.errorbar(Lam_band_av,Phot_F_target*corr_aperture,yerr=Phot_E_target,color='green',marker='s',)
+	plt.axis([2500,23000,-0.2e-18,4e-18])
+	plt.show()
+
+	# read out
+	# NIR+VIS
+	# name_out = Spec_path[ii].split('/')[-1].replace('_avwCombined_OBx5_sig5','').replace('opt_','opt_stdcorr_')
+	# path = '../../../X-shooter/cQGsample/Spectra_analysis/3-Stdcorr_slit_aper/NIR+VIS/%s' % name_out
+
+	# NIR
+	name_out = Spec_path[ii].split('/')[-1].replace('opt','opt_stdcorr')
+	path = '../../../X-shooter/cQGsample/Spectra_analysis/3-Stdcorr_slit_aper/NIR/%s' % name_out
+	# print path_out
+	
+
+	st.read_out_3arr_2dfits(path,F_corr,E,M,hdf,hde,hdm)
 
 
 
-	raise
+
+	# Change to st.read_out_3arr_2dfits(...) when bpm is included
+	# if not os.path.exists(path):
+	# 	# Read out flux array
+	# 	pf.writeto(path, F_corr, hdf)
+
+	# 	# Read out error array
+	# 	pf.append(path, E, hde)
+
+	# else:
+	# 	os.system('mv %s' % path.replace('.fits','_old.fits'))
+	# 	# Read out flux array
+	# 	pf.writeto(path, F_corr, hdf)
+
+	# 	# Read out error array
+	# 	pf.append(path, E, hde)
+	# 	print 'former file moved to *_old.fits'
+	# raise
 
 
 
-# Make slitloss correction
-
-# Make aperture correction
 
 
 
@@ -86,7 +271,13 @@ for i in range(len(path_NIR_VIS)):
 
 
 
-# heliocentric velocity correction
+
+
+
+
+########################################
+### heliocentric velocity correction ###
+
 """ The P93 program was taking over the whole year, and the position of the earth was worst in the case of 108899 and 773654 where the difference in radial velocity (dfits keyword: QC.VRAD.BARYCOR) were maximum 10 km/s.
 
 	If estimating the maximal error associated with this we get for lambda = 20.000 a
@@ -98,7 +289,8 @@ for i in range(len(path_NIR_VIS)):
 	radial velocity.
 """
 
-
+########################################
+########################################
 
 
 

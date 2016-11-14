@@ -26,6 +26,7 @@ def read_in_COSMOS_cat(path):
 
 
 def extract_filters(fdata,Type='uJy'):
+    c = 299792458 #m / s
     if Type == 'uJy':
         F_U     = fdata.field('u_FLUX_APER2')
         E_U     = fdata.field('u_FLUXERR_APER2')
@@ -58,37 +59,39 @@ def extract_filters(fdata,Type='uJy'):
         F_Ch4   = fdata.field('SPLASH_4_FLUX')
         E_Ch4   = fdata.field('SPLASH_4_FLUX_ERR')
     
+        return F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks#, F_Ch1,E_Ch1,F_Ch2,E_Ch2,F_Ch3,E_Ch3,F_Ch4,E_Ch4
+    
     elif Type == 'cgsA':
-        print 'Update first to include same bands as Type="uJy"'
-        # # Change Units from uJy -> erg/s/cm2/Hz -> erg/s/cm2/A
-        # mJy2freq = 10**(-29) # uJy = 10^(-29) erg/s/cm2/Hz
-        # Lam_band_av = np.array([3650,4450,5510,6580,8060,9000,12200,16300,21900]) # U,B,V,R,I,Z,J,H, K
-        # Freq2Lambda = c*10**(10)/(Lam_band_av**2)
+        # Change Units from uJy -> erg/s/cm2/Hz -> erg/s/cm2/A
+        mJy2freq = 10**(-29) # uJy = 10^(-29) erg/s/cm2/Hz
+        Lam_band_av = np.array([3562,4458,5477,6186,7506,8962,10200,12520,16450,21470]) # FILTER.RES.SWv5.R300.info + http://casu.ast.cam.ac.uk/surveys-projects/vista/technical/filter-set
+        Freq2Lambda = c*10**(10)/(Lam_band_av**2)
         
-        # # Selecting the Bands and correcting to erg/s/cm2/A
-        # F_U = (f1.field('u_FLUX_APER2')*mJy2freq)*Freq2Lambda[0]
-        # E_U = (f1.field('u_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[0]
-        # F_B = (f1.field('B_FLUX_APER2')*mJy2freq)*Freq2Lambda[1]
-        # E_B = (f1.field('B_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[1]
-        # F_V = (f1.field('V_FLUX_APER2')*mJy2freq)*Freq2Lambda[2]
-        # E_V = (f1.field('V_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[2]
-        # F_R = (f1.field('r_FLUX_APER2')*mJy2freq)*Freq2Lambda[3]
-        # E_R = (f1.field('r_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[3]
-        # F_I = (f1.field('ip_FLUX_APER2')*mJy2freq)*Freq2Lambda[4]
-        # E_I = (f1.field('ip_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[4]
-        # F_z = (f1.field('zp_FLUX_APER2')*mJy2freq)*Freq2Lambda[5]
-        # E_z = (f1.field('zp_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[5]
-        # F_Y = (f1.field('yHSC_FLUX_APER2')*mJy2freq)*Freq2Lambda[5]
-        # E_Y = (f1.field('yHSC_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[5]
-        # F_J = (f1.field('J_FLUX_APER2')*mJy2freq)*Freq2Lambda[6]
-        # E_J = (f1.field('J_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[6]
-        # F_H = (f1.field('H_FLUX_APER2')*mJy2freq)*Freq2Lambda[7]
-        # E_H = (f1.field('H_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[7]
-        # F_Ks = (f1.field('Ks_FLUX_APER2')*mJy2freq)*Freq2Lambda[8]
-        # E_Ks = (f1.field('Ks_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[8]
-        # Ftot_K = (f1.field('Ks_FLUX_APER3')*mJy2freq)*Freq2Lambda[8]
-        # Etot_K = (f1.field('Ks_FLUXERR_APER3')*mJy2freq)*Freq2Lambda[8]
+        # Selecting the Bands and correcting to erg/s/cm2/A
+        F_U = (fdata.field('u_FLUX_APER2')*mJy2freq)*Freq2Lambda[0]
+        E_U = (fdata.field('u_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[0]
+        F_B = (fdata.field('B_FLUX_APER2')*mJy2freq)*Freq2Lambda[1]
+        E_B = (fdata.field('B_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[1]
+        F_V = (fdata.field('V_FLUX_APER2')*mJy2freq)*Freq2Lambda[2]
+        E_V = (fdata.field('V_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[2]
+        F_R = (fdata.field('r_FLUX_APER2')*mJy2freq)*Freq2Lambda[3]
+        E_R = (fdata.field('r_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[3]
+        F_I = (fdata.field('ip_FLUX_APER2')*mJy2freq)*Freq2Lambda[4]
+        E_I = (fdata.field('ip_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[4]
+        F_z = (fdata.field('zp_FLUX_APER2')*mJy2freq)*Freq2Lambda[5]
+        E_z = (fdata.field('zp_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[5]
+        F_Y = (fdata.field('yHSC_FLUX_APER2')*mJy2freq)*Freq2Lambda[6]
+        E_Y = (fdata.field('yHSC_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[6]
+        F_J = (fdata.field('J_FLUX_APER2')*mJy2freq)*Freq2Lambda[7]
+        E_J = (fdata.field('J_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[7]
+        F_H = (fdata.field('H_FLUX_APER2')*mJy2freq)*Freq2Lambda[8]
+        E_H = (fdata.field('H_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[8]
+        F_Ks = (fdata.field('Ks_FLUX_APER2')*mJy2freq)*Freq2Lambda[9]
+        E_Ks = (fdata.field('Ks_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[9]
+        Ftot_K = (fdata.field('Ks_FLUX_APER3')*mJy2freq)*Freq2Lambda[9]
+        Etot_K = (fdata.field('Ks_FLUXERR_APER3')*mJy2freq)*Freq2Lambda[9]
    
+        return F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks,Ftot_K,Etot_K
 
     elif Type == 'ABmag':
         print 'Update first to include same bands as Type="uJy"'
@@ -113,7 +116,7 @@ def extract_filters(fdata,Type='uJy'):
         # Ftot_K = f1.field('Ks_MAG_APER3')
         # Etot_K = f1.field('Ks_MAGERR_APER3')
 
-    return F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks#, F_Ch1,E_Ch1,F_Ch2,E_Ch2,F_Ch3,E_Ch3,F_Ch4,E_Ch4
+
 
 
 def check_ID(min_dist,id_min):
@@ -124,11 +127,16 @@ def check_ID(min_dist,id_min):
         print 'ID match'
 
 
-def make_cat_array(targetnames,coordinates,dataphot):
+def make_cat_array(targetnames,coordinates,dataphot,t):
     # Extract filters
-    # F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks, F_Ch1,E_Ch1,F_Ch2,E_Ch2,F_Ch3,E_Ch3,F_Ch4,E_Ch4 = extract_filters(dataphot,'uJy')
-    
-    F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks = extract_filters(dataphot,'uJy')
+    if t == 'uJy':
+        # F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks, F_Ch1,E_Ch1,F_Ch2,E_Ch2,F_Ch3,E_Ch3,F_Ch4,E_Ch4 = extract_filters(dataphot,'uJy')
+        size = 21
+        F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks = extract_filters(dataphot,t)
+
+    if t == 'cgsA':
+        size = 23
+        F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks, Ftot_K, Etot_K = extract_filters(dataphot,t)
 
 
     # RA and DEC of Photometric data
@@ -136,7 +144,7 @@ def make_cat_array(targetnames,coordinates,dataphot):
     delta_J2000 = Phot_data.field('DELTA_J2000')*2*np.pi/360 # radians
 
     # Array = np.zeros(shape=(len(targetnames),29))
-    Array = np.zeros(shape=(len(targetnames),21))
+    Array = np.zeros(shape=(len(targetnames),size))
     for ii in range(len(targetnames)):
         ra_rad_xsh  = coordinates.ra.deg[ii]*2*np.pi/360
         dec_rad_xsh = coordinates.dec.deg[ii]*2*np.pi/360
@@ -147,8 +155,15 @@ def make_cat_array(targetnames,coordinates,dataphot):
         check_ID(r,ID)
 
         # Fill array
-        # Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID],F_Ch1[ID],E_Ch1[ID],F_Ch2[ID],E_Ch2[ID],F_Ch3[ID],E_Ch3[ID],F_Ch4[ID],E_Ch4[ID]]
-        Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID]]
+        if t == 'uJy':
+            # Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID],F_Ch1[ID],E_Ch1[ID],F_Ch2[ID],E_Ch2[ID],F_Ch3[ID],E_Ch3[ID],F_Ch4[ID],E_Ch4[ID]]
+            Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID]]
+        
+
+        if t == 'cgsA':
+            Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID],Ftot_K[ID],Etot_K[ID]]
+
+
     return Array
 
 
@@ -179,9 +194,9 @@ def read_out_catalogue(output_name,Arr,hdr_str):
 ######################
 ### Set parameters ###
 
-c = 299792458 #m / s
-plotnr = 0
 
+plotnr = 0
+type_unit = 'cgsA'
 
 
 ################################
@@ -197,19 +212,19 @@ Namelist = ['105842','108899','155853','171060','171687','239220','230929','2505
 
 ##########################
 ### Read in Photometry ###
-Phot_data = read_in_COSMOS_cat('/Volumes/DataDrive/X-shooter/P93/COSMOS2015_Photometry/UVISTA-dr2_COSMOS_chi2_v7_03_02_15.fits')
+Phot_data = read_in_COSMOS_cat('../../../X-shooter/cQGsample/COSMOS2015_Photometry/UVISTA-dr2_COSMOS_chi2_v7_03_02_15.fits')
 
 # # Read in COSMOS z_phot (La Phare galaxy template fits)
 # path_z = '/Volumes/DataDrive/X-shooter/P93/COSMOS2015_Photometry/zphot_ID_RA_DEC.txt'
 # data = np.genfromtxt(path_z)
 # phot_z_gal = data[3,:]
-
+print 'Photometry read'
 
 ####################################################
 ### Create array with the filters of each target ###
 
-Catalogue_arr = make_cat_array(Namelist,coords,Phot_data)
-
+Catalogue_arr = make_cat_array(Namelist,coords,Phot_data,type_unit)
+print 'Catalogue created'
 
 ############
 ### Plot ###
@@ -222,13 +237,18 @@ Catalogue_arr = make_cat_array(Namelist,coords,Phot_data)
 # header_string = '#     id    U_colf     U_cole     B_colf     B_cole     V_colf     V_cole     R_colf     R_cole     I_colf     I_cole     z_colf     z_cole     Y_colf     Y_cole     J_colf     J_cole     H_colf     H_cole     K_colf     K_cole     Ch1_colf     Ch1_cole     Ch2_colf     Ch2_cole     Ch3_colf     Ch3_cole     Ch4_colf     Ch4_cole'
 # read_out_path = 'Output/PhotCat_xsh_all_V1_uJy.cat'
 
-header_string = '#     id    U_colf     U_cole     B_colf     B_cole     V_colf     V_cole     R_colf     R_cole     I_colf     I_cole     z_colf     z_cole     Y_colf     Y_cole     J_colf     J_cole     H_colf     H_cole     K_colf     K_cole'
-read_out_path = 'Output/PhotCat_xsh_all_V1_uJy_NoSPLASH.cat'
+if type_unit == 'cgsA':
+    header_string = '#     id    U_colf     U_cole     B_colf     B_cole     V_colf     V_cole     R_colf     R_cole     I_colf     I_cole     z_colf     z_cole     Y_colf     Y_cole     J_colf     J_cole     H_colf     H_cole     K_colf     K_cole K_totf K_tote'
 
 
+    read_out_path = 'Output/PhotCat_xsh_all_V1_cgsA_NoSPLASH.cat'
+    read_out_catalogue(read_out_path,Catalogue_arr,header_string)
 
+if type_unit == 'uJy':
+    header_string = '#     id    U_colf     U_cole     B_colf     B_cole     V_colf     V_cole     R_colf     R_cole     I_colf     I_cole     z_colf     z_cole     Y_colf     Y_cole     J_colf     J_cole     H_colf     H_cole     K_colf     K_cole'
 
-read_out_catalogue(read_out_path,Catalogue_arr,header_string)
+    read_out_path = 'Output/PhotCat_xsh_all_V1_uJy_NoSPLASH.cat'
+    read_out_catalogue(read_out_path,Catalogue_arr,header_string)
 
 
 

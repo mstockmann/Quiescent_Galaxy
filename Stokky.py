@@ -49,6 +49,17 @@ def read_2d_fits(path):
     Arr3 = f[2].data
     return Arr1, Arr2, Arr3, hd1, hd2, hd3
 
+def read_out_1d_fits(path, F, E, M, hdf, hde, hdm):
+    if not os.path.exists(path):
+        pf.writeto(path, F, hdf)
+        pf.append(path, E, hde)
+        pf.append(path, M, hdm)
+    else:
+        os.system('mv %s' % path.replace('.fits','_old.fits'))
+        pf.writeto(path, F, hdf)
+        pf.append(path, E, hde)
+        pf.append(path, M, hdm)
+        print 'former file moved to *_old.fits'
 
 def read_out_3arr_2dfits(path,arr1,arr2,arr3,hd1,hd2,hd3):
     if not os.path.exists(path):
@@ -62,7 +73,7 @@ def read_out_3arr_2dfits(path,arr1,arr2,arr3,hd1,hd2,hd3):
         pf.append(path, arr3, hd3)
 
     else:
-        os.system('rm %s' % path)
+        os.system('mv %s' % path.replace('.fits','_old.fits'))
         # Read out flux array
         pf.writeto(path, arr1, hd1)
         
@@ -71,7 +82,7 @@ def read_out_3arr_2dfits(path,arr1,arr2,arr3,hd1,hd2,hd3):
 
         # Read out bad pixel map
         pf.append(path, arr3, hd3)
-        print 'file already exists'
+        print 'former file moved to *_old.fits'
 
 
 def convert_2_rest_frame(W,F,E,z):
@@ -142,31 +153,31 @@ def plot_emission_lines():
 def update_header(Arr,hdr,hdr_1d,hdr_no):
     if hdr_no == 0:
         hdr['REDSHIFT'] = (hdr_1d['REDSHIFT'],hdr_1d.comments['REDSHIFT'])
-        hdr['NAXIS3']   = Arr.shape[0]
+        hdr['NAXIS1']   = Arr.shape[0]
         hdr['EXTNAME']  = 'FLUX'
-        hdr['DATE']     = '2019-11-11'
+        hdr['DATE']     = '2019-11-14'
         hdr['CONTENT']  = 'Flux [erg/cm2/s/AA]'
-        hdr['CRPIX3']   = 1
-        hdr['CRVAL3']   = (hdr_1d['CRVAL1']*10,'AA')
-        hdr['CDELT3']   = (hdr_1d['CDELT1']*10,'AA')
+        hdr['CRPIX1']   = 1
+        hdr['CRVAL1']   = (hdr_1d['CRVAL1']*10,'AA')
+        hdr['CDELT1']   = (hdr_1d['CDELT1']*10,'AA')
 
     if hdr_no == 1:
         hdr['NAXIS3']   = Arr.shape[0]
         hdr['EXTNAME']  = 'ERROR'
-        hdr['DATE']     = '2019-11-11'
+        hdr['DATE']     = '2019-11-14'
         hdr['CONTENT']  = 'Error [erg/cm2/s/AA]'
-        hdr['CRPIX3']   = 1
-        hdr['CRVAL3']   = (hdr_1d['CRVAL1']*10,'AA')
-        hdr['CDELT3']   = (hdr_1d['CDELT1']*10,'AA')
+        hdr['CRPIX1']   = 1
+        hdr['CRVAL1']   = (hdr_1d['CRVAL1']*10,'AA')
+        hdr['CDELT1']   = (hdr_1d['CDELT1']*10,'AA')
     
     if hdr_no == 2:
         hdr['NAXIS3']   = Arr.shape[0]
         hdr['EXTNAME']  = 'BADPIX'
-        hdr['DATE']     = '2019-11-11'
+        hdr['DATE']     = '2019-11-14'
         hdr['CONTENT']  = 'bpm, =1 bad'
-        hdr['CRPIX3']   = 1
-        hdr['CRVAL3']   = (hdr_1d['CRVAL1']*10,'AA')
-        hdr['CDELT3']   = (hdr_1d['CDELT1']*10,'AA')
+        hdr['CRPIX1']   = 1
+        hdr['CRVAL1']   = (hdr_1d['CRVAL1']*10,'AA')
+        hdr['CDELT1']   = (hdr_1d['CDELT1']*10,'AA')
     return hdr
 
 def Swap_0_and_1(Map):
@@ -213,4 +224,30 @@ def save_3d_cube_fits(path,F,E,M,hdf,hde,hdm):
 
 
 
+def save_1d_cube_fits(path,F,E,M,hdf,hde,hdm):
+    ''' 1) Load example fits cube
 
+    '''
+    # read in example
+    f_ex = fits.open('data_cube_ex/nodding_macs2129_full_nir_9.6.main_box.fits')
+    hd0 = f_ex[0].header
+    hd1 = f_ex[1].header
+    hd2 = f_ex[2].header
+
+    # make new 3d cube
+    # F_3d = np.zeros((len(F), 1, 1))
+    # E_3d = np.zeros((len(E), 1, 1))
+    # M_3d = np.zeros((len(M), 1, 1))
+
+    M_g0_b1 = Swap_0_and_1(M)
+    
+    # print F.shape[0]
+    # raise
+
+    hd0 = update_header(F,hd0,hdf,0)
+    hd1 = update_header(F,hd1,hde,1)
+    hd2 = update_header(F,hd2,hdm,2)
+
+    fits.writeto(path, F, hd0)
+    fits.append(path, E, hd1)
+    fits.append(path, M_g0_b1, hd2)

@@ -52,9 +52,23 @@ def read_in_spurious_mask():
 #------------------------------------------------#
 
 
-# NIR; rebin, 9 A, optimal ext 
-Path_1d_spectra = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15_opt.fits')
 
+##### OBS #####
+# Notes 171060 remove spurios pixel at 15425
+
+
+
+
+
+# # NIR; rebin, 9 A, optimal ext 
+# Path_1d_spectra = glob.glob('../../X-shooter/cQGsample/Objects/*/NIR_corr/*_V1_NIRcorr_wmrebin15_opt.fits')
+
+
+# NIR; rebin, 9 A, optimal ext & 2d emission removal + stdcorr
+Path_1d_spectra = glob.glob('../../X-shooter/cQGsample/Spectra_analysis/3-Stdcorr_slit_aper/NIR/*_V1_NIRcorr_wmrebin15_er2d_opt_stdcorr.fits')
+# print len(Path_1d_spectra)
+# print Path_1d_spectra
+# raise
 
 plot_yes = 1
 
@@ -64,7 +78,7 @@ mask_arr = np.zeros(shape=(len(F0),len(Path_1d_spectra)))+1
 lim = len(F0)
 print lim
 
-for i in range(6,len(Path_1d_spectra),1):
+for i in range(0,len(Path_1d_spectra),1):
     target = Path_1d_spectra[i].split('/')[-1].split('_')[0]
 
     z_spec = st.load_spec_z('../../X-shooter/cQGsample/Collected_info/z_spec.txt',target)
@@ -101,7 +115,8 @@ for i in range(6,len(Path_1d_spectra),1):
         plt.title('%s' % target)
         plt.plot(W_rf, F_rf, color='black')
         plt.plot(W_rf_mask, F_rf_mask, color='green')
-        plt.plot(W_rf, E_rf, color='purple', alpha=0.2)
+        # plt.plot(W_rf, E_rf, color='purple', alpha=0.2)
+        plt.fill_between(W_rf, np.zeros(len(E_rf)), E_rf, color='purple', alpha=0.2,edgecolor='purple')
 
         st.plot_emission_lines()
         st.plot_absorption_lines()
@@ -121,15 +136,25 @@ for i in range(6,len(Path_1d_spectra),1):
 
         plt.show()
 
-    # filename = Path_1d_spectra[i].split('/')[-1].replace('.fits','_bpm.fits') 
-    # path_out = '../../X-shooter/cQGsample/Spectra/Stefano_BPM_update/%s' % filename 
-    # st.save_3d_cube_fits(path_out,F,E,M,hdf,hde,hdm)
-    # raise
+    filename = Path_1d_spectra[i].split('/')[-1].replace('.fits','_bpm.fits') 
+    path_out = '../../X-shooter/cQGsample/Spectra_analysis/4-Stefano_BPM_update/%s' % filename
+    # st.save_1d_cube_fits(path_out,F,E,M,hdf,hde,hdm)
+    raise
 
 
 
 
 
+# path = '/Users/mstockmann/PhD_DARK/Data/X-shooter/cQGsample/Spectra_analysis/4-Stefano_BPM_update/105842_V1_NIRcorr_wmrebin15_er2d_opt_bpm.fits'
+
+
+# f = fits.open(path)
+# print f.info()
+
+# W, F, E, M, hdf, hde, hdm = st.read_in_1d_fits(path)
+
+# plt.plot(W/10,F)
+# plt.show()
 
 
 
