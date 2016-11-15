@@ -182,7 +182,7 @@ for ii in range(len(Spec_path)):
 	# E = data_arr[1].data#/np.median(data_arr[0].data)
 	# W = (hdf['CRVAL1'] + (hdf['CRPIX1'] - 1 + np.arange(hdf['NAXIS1']))*hdf['CDELT1'])*10 
 
-	W, F, E, M, hdf, hde, hdm = st.read_in_1d_fits(Spec_path[0])
+	W, F, E, M, hdf, hde, hdm = st.read_in_1d_fits(Spec_path[ii])
 
 	# pair transmission with spec arr
 	WH_pair, TH_pair = pair_transmission_with_spec(W,W_Hspec,T_Hspec)
@@ -194,6 +194,9 @@ for ii in range(len(Spec_path)):
 
 	# make synthetic mag
 	H_synthetic = np.sum(F*TH_pair)/np.sum(TH_pair)
+
+
+
 
 
 	# make slit loss and aperture corrections to the flux spec
@@ -213,14 +216,6 @@ for ii in range(len(Spec_path)):
 		Phot_F_target[uu] = Photometric_list[uu*2][ii]
 		Phot_E_target[uu] = Photometric_list[uu*2+1][ii]
 
-
-	# print len(Photometric_list)
-	# raise
-
-	# print Photometric_list[::2]
-	# print Lam_band_av
-	# raise
-
 	
 	plt.plot(W,F,color='black')
 	plt.plot(W,F_corr,color='red')
@@ -239,28 +234,8 @@ for ii in range(len(Spec_path)):
 	# print path_out
 	
 
-	st.read_out_3arr_2dfits(path,F_corr,E,M,hdf,hde,hdm)
+	# st.read_out_3arr_2dfits(path,F_corr,E,M,hdf,hde,hdm)
 
-
-
-
-	# Change to st.read_out_3arr_2dfits(...) when bpm is included
-	# if not os.path.exists(path):
-	# 	# Read out flux array
-	# 	pf.writeto(path, F_corr, hdf)
-
-	# 	# Read out error array
-	# 	pf.append(path, E, hde)
-
-	# else:
-	# 	os.system('mv %s' % path.replace('.fits','_old.fits'))
-	# 	# Read out flux array
-	# 	pf.writeto(path, F_corr, hdf)
-
-	# 	# Read out error array
-	# 	pf.append(path, E, hde)
-	# 	print 'former file moved to *_old.fits'
-	# raise
 
 
 

@@ -78,10 +78,11 @@ mask_arr = np.zeros(shape=(len(F0),len(Path_1d_spectra)))+1
 lim = len(F0)
 print lim
 
-for i in range(0,len(Path_1d_spectra),1):
+for i in range(3,len(Path_1d_spectra),1):
     target = Path_1d_spectra[i].split('/')[-1].split('_')[0]
 
-    z_spec = st.load_spec_z('../../X-shooter/cQGsample/Collected_info/z_spec.txt',target)
+    z_spec = st.load_spec_z('../../X-shooter/cQGsample/Collected_info/z_spec_notcalib.txt',target)
+    # z_spec = 2.02#1.712
 
     # read in 1d spectrum
     W, F, E, M, hdf, hde, hdm = st.read_in_1d_fits(Path_1d_spectra[i])
@@ -115,6 +116,11 @@ for i in range(0,len(Path_1d_spectra),1):
         plt.title('%s' % target)
         plt.plot(W_rf, F_rf, color='black')
         plt.plot(W_rf_mask, F_rf_mask, color='green')
+
+        from scipy.ndimage.filters import gaussian_filter
+        F_new_rf_conv = gaussian_filter(F_rf_mask, sigma=2)
+        plt.plot(W_rf_mask, F_new_rf_conv, color='purple')
+
         # plt.plot(W_rf, E_rf, color='purple', alpha=0.2)
         plt.fill_between(W_rf, np.zeros(len(E_rf)), E_rf, color='purple', alpha=0.2,edgecolor='purple')
 
@@ -122,13 +128,13 @@ for i in range(0,len(Path_1d_spectra),1):
         st.plot_absorption_lines()
         plt.xlabel('$\lambda [\AA{}]$')
         plt.ylabel('Flux [erg/s/cm2/$\AA{}$]')
-        plt.axis([min(W_rf)-500,max(W_rf)+500,-0.4e-17, 1.8e-17])
+        plt.axis([min(W_rf)-500,max(W_rf)+500,-0.4e-17, 1.3e-17])
 
         plt.subplot(3,1,2)
         plt.plot(np.arange(len(F_rf)), F_rf, color='black')
         plt.plot(np.arange(len(F_rf)), E_rf, color='purple', alpha=0.2)
 
-        plt.ylim([-0.4e-17, 1.8e-17])
+        plt.ylim([-0.4e-17, 1.7e-17])
 
         plt.subplot(3,1,3)
         plt.plot(W, F, color='black')
@@ -139,7 +145,7 @@ for i in range(0,len(Path_1d_spectra),1):
     filename = Path_1d_spectra[i].split('/')[-1].replace('.fits','_bpm.fits') 
     path_out = '../../X-shooter/cQGsample/Spectra_analysis/4-Stefano_BPM_update/%s' % filename
     # st.save_1d_cube_fits(path_out,F,E,M,hdf,hde,hdm)
-    raise
+    # raise
 
 
 

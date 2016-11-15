@@ -107,6 +107,8 @@ def plot_absorption_lines():
     Mg_5183    = 5183.3
     Fe_5332    = 5331.5
     Fe_5401    = 5401.4
+    Na_5890    = 5889.95
+    Na_5896    = 5895.92
 
     CaI_4227   = 4226.7
     H_beta  = 4861.3
@@ -119,10 +121,12 @@ def plot_absorption_lines():
     H9      = 3835.4
     H_alpha = 6562.8
  
+
+
     
     ## Plot absorption lines
-    lines = np.array([Mg_5169, Mg_5175, Mg_5183, Fe_5332, Fe_5401, CaI_4227, H_beta, H_gamma, H_delta, B4000, H_eps, K, H8, H9, H_alpha])
-    name_list = ['Mg_5169', 'Mg_5175', 'Mg_5183', 'Fe_5332', 'Fe_5401', 'CaI_4227', 'H_beta', 'H_gamma', 'H_delta', 'B4000', 'H_eps', 'K', 'H8', 'H9', 'H_alpha']
+    lines = np.array([Na_5896,Na_5890,Mg_5169, Mg_5175, Mg_5183, Fe_5332, Fe_5401, CaI_4227, H_beta, H_gamma, H_delta, B4000, H_eps, K, H8, H9, H_alpha])
+    name_list = ['Na_5896','Na_5890','Mg_5169', 'Mg_5175', 'Mg_5183', 'Fe_5332', 'Fe_5401', 'CaI_4227', 'H_beta', 'H_gamma', 'H_delta', 'B4000', 'H_eps', 'K', 'H8', 'H9', 'H_alpha']
     for j in range(len(lines)):
         plt.vlines(lines[j],0,5,color='r')
         plt.text(lines[j],0,name_list[j],rotation=-90)
