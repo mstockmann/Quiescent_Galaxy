@@ -9,62 +9,45 @@
 
 pro measure_indices_new_redux
     common idxinfo
+    DIR='test_spectrum/'
 
-    DIR = '../../../X-shooter/cQGsample/Spectra_analysis/3-Stdcorr_slit_aper/NIR/'
-	FILE_IN = '_V1_NIRcorr_wmrebin15_er2d_opt_stdcorr.dat'
-    name_list = ['105842','108899','155853','171060','171687','230929','239220','250513','773654','90676','CP-1243752','CP-1291751','CP-540713','CP-561356']
-    z_spec_list = [2.0197,2.2292,1.9810,2.1010,2.1020,2.1681,2.0000,2.0829,2.0300,2.4758,2.0910,2.0148,2.2101,2.6900]
+    file=DIR+'108899_avwCombined_OBx5_sig5_V1_NIRcorr_wmrebin15_opt.dat'
+    str={lambda:fltarr(1),flux:fltarr(1),err:fltarr(1),qual:intarr(1)}
+    nlambda=file_lines(file)
+    data=replicate(str,nlambda)
+    openr,lun,file,/get_lun
+    readf,lun,data
+    free_lun,lun
+;;; Put wavelength in air
+    vactoair,data.lambda
 
+    zgal=2.2292
+    normalisation = 1.e18
 
-    for i=0,n_elements(name_list)-1 do begin
-    ;for i=0,1 do begin
-        file = DIR+'_'+name_list[i]+FILE_IN
-        outfile = '../../../X-shooter/cQGsample/Spectra_analysis/5-Lick_Indices/'+'Lick_Indices.'+name_list[i]+FILE_IN
-        ;file_out = name_list[i]
-        print, outfile
-        ;stop
+    lambda_res1=data.lambda[0]/(1.+zgal)
+    flux1=data.flux[0]*normalisation
+    error1=data.err[0]*normalisation
 
-        ;DIR='test_spectrum/'
-        ;file=DIR+'108899_avwCombined_OBx5_sig5_V1_NIRcorr_wmrebin15_opt.dat'
-        ;outfile = '/Output/test.txt'
+    lambda_res=lambda_res1
+    flux=flux1
+    error=error1
+    
+    set_plot,'x'
+    device,decompose=0
+    loadct,13
+    ;tmp=get_position_arr(0,nx=1,ny=2,xmin=0.1,xmax=0.9,ymin=0.1,ymax=0.9,ygap=0)
+    pos=[0.1,0.1,0.9,0.9]
+    plot,lambda_res,flux,xstyle=1,ystyle=1,position=pos,yrange=[0.,12.],xrange=[3700.,5500.]
+    oplot,lambda_res,error,color=100
+;    oplot,lambda_res1,flux1,color=200
+;    oplot,lambda_res1,error1,color=160
+    ;pos=get_position_arr(1)
+    ;plot,lambda_res,flux/error,xstyle=1,ystyle=1,position=pos,/noerase,xrange=[3700.,5500.]
+    plot,lambda_res,flux/error,xstyle=1,ystyle=1,/noerase,xrange=[3700.,5500.]
+    ;stop
 
-        str={lambda:fltarr(1),flux:fltarr(1),err:fltarr(1),qual:intarr(1)}
-        nlambda=file_lines(file)
-        data=replicate(str,nlambda)
-        openr,lun,file,/get_lun
-        readf,lun,data
-        free_lun,lun
-    ;;; Put wavelength in air
-        vactoair,data.lambda
-
-        zgal = z_spec_list[i]
-        print, zgal
-        normalisation = 1.e18
-
-        lambda_res1=data.lambda[0]/(1.+zgal)
-        flux1=data.flux[0]*normalisation
-        error1=data.err[0]*normalisation
-
-        lambda_res=lambda_res1
-        flux=flux1
-        error=error1
-        
-        set_plot,'x'
-        device,decompose=0
-        loadct,13
-        ;tmp=get_position_arr(0,nx=1,ny=2,xmin=0.1,xmax=0.9,ymin=0.1,ymax=0.9,ygap=0)
-        pos=[0.1,0.1,0.9,0.9]
-        plot,lambda_res,flux,xstyle=1,ystyle=1,position=pos,yrange=[0.,12.],xrange=[3700.,5500.]
-        oplot,lambda_res,error,color=100
-    ;    oplot,lambda_res1,flux1,color=200
-    ;    oplot,lambda_res1,error1,color=160
-        ;pos=get_position_arr(1)
-        ;plot,lambda_res,flux/error,xstyle=1,ystyle=1,position=pos,/noerase,xrange=[3700.,5500.]
-        plot,lambda_res,flux/error,xstyle=1,ystyle=1,/noerase,xrange=[3700.,5500.]
-        ;stop
-
-        measure_idx2,flux1,error,lambda_res,outfile
-    endfor
+    measure_idx2,flux1,error,lambda_res,outfile
+    
 end
 
 

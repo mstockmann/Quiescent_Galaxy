@@ -78,7 +78,7 @@ mask_arr = np.zeros(shape=(len(F0),len(Path_1d_spectra)))+1
 lim = len(F0)
 print lim
 
-for i in range(3,len(Path_1d_spectra),1):
+for i in range(1,len(Path_1d_spectra),1):
     target = Path_1d_spectra[i].split('/')[-1].split('_')[0]
 
     z_spec = st.load_spec_z('../../X-shooter/cQGsample/Collected_info/z_spec_notcalib.txt',target)
@@ -144,7 +144,7 @@ for i in range(3,len(Path_1d_spectra),1):
 
     filename = Path_1d_spectra[i].split('/')[-1].replace('.fits','_bpm.fits') 
     path_out = '../../X-shooter/cQGsample/Spectra_analysis/4-Stefano_BPM_update/%s' % filename
-    # st.save_1d_cube_fits(path_out,F,E,M,hdf,hde,hdm)
+    st.save_1d_cube_fits(path_out,F,E,M,hdf,hde,hdm)
     # raise
 
 

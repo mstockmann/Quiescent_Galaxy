@@ -1,0 +1,42 @@
+Document by Stefano Zibetti Oct./Nov. 2013
+
+about instrumental resolution
+
+1) remember gandalf works with log resampled spectra
+
+2) INT_DISP is given as sigma in km/s
+
+3) set_constraints (l.1031) is called to set the "functargs" structure
+(among other things)
+
+functargs={CSTAR:cstar, GALAXY:galaxy, NOISE:noise, $
+           EMISSION_SETUP:emission_setup, KINSTARS:kinstars, $
+           VELSCALE:velscale, DEGREE:degree, MDEGREE:mdegree, $
+           GOODPIXELS:goodpixels, L0_GAL:l0_gal, LSTEP_GAL:lstep_gal, $
+           INT_DISP:int_disp, $ FOR_ERRORS:for_errors}
+
+At this stage INT_DISP is still a sigma in km/s
+
+4) functargs are passed as parameters of FITFUNC_GAS when running mpfit
+
+5) FITFUNC_GAS calls create_templates and passes int_disp_pix =
+int_disp/velscale as an argument
+
+6) create_templates calls create_gaussn passing int_disp_pix as an argument
+
+
+== TO TAKE INTO ACCOUNT INSTRUMENTAL RESOLUTION WITH FIXED DLAMBDA
+
+1) introduce new parameter in call to gandalf: INT_RES given as
+sigma=FWHM/2.35 in AA at galaxy's rest frame. INT_RES must be also
+included in SET_CONSTRAINTS, in the "functargs" structure, in the
+parameters of FITFUNC_GAS() and of CREATE_TEMPLATES()
+
+2) modify CREATE_TEMPLATES()
+FUNCTION CREATE_TEMPLATES, EMISSION_SETUP=emission_setup, PARS=pars, NPIX=npix,$
+        LSTEP_GAL=lstep_gal, INT_DISP=int_disp, INT_RES=int_res, LOG10=log10 ,$
+        FOR_ERRORS=for_errors, VELSCALE=velscale
+
+use fixed velocity dispersion or fixed resolution as needed:
+
+INT_DISP_PIX is calculated internally using velscale and either INT_DISP or INT_RES
