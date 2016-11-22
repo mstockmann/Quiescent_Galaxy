@@ -20,6 +20,8 @@ import astropy.units as u
 
 def read_in_COSMOS_cat(path):
     f = pf.open(path)
+    # print  f[1].header
+    # raise
     #f0 = f[0].data; hd0 = f[0].header
     f1 = f[1].data; hd1 = f[1].header
     return f1
@@ -93,6 +95,36 @@ def extract_filters(fdata,Type='uJy'):
    
         return F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks,Ftot_K,Etot_K
 
+    elif Type == 'cgsA_tot':
+        # Change Units from uJy -> erg/s/cm2/Hz -> erg/s/cm2/A
+        mJy2freq = 10**(-29) # uJy = 10^(-29) erg/s/cm2/Hz
+        Lam_band_av = np.array([3562,4458,5477,6186,7506,8962,10200,12520,16450,21470]) # FILTER.RES.SWv5.R300.info + http://casu.ast.cam.ac.uk/surveys-projects/vista/technical/filter-set
+        Freq2Lambda = c*10**(10)/(Lam_band_av**2)
+        
+        # Selecting the Bands and correcting to erg/s/cm2/A
+        F_U = (fdata.field('u_FLUX_APER2')*mJy2freq)*Freq2Lambda[0]
+        E_U = (fdata.field('u_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[0]
+        F_B = (fdata.field('B_FLUX_APER2')*mJy2freq)*Freq2Lambda[1]
+        E_B = (fdata.field('B_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[1]
+        F_V = (fdata.field('V_FLUX_APER2')*mJy2freq)*Freq2Lambda[2]
+        E_V = (fdata.field('V_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[2]
+        F_R = (fdata.field('r_FLUX_APER2')*mJy2freq)*Freq2Lambda[3]
+        E_R = (fdata.field('r_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[3]
+        F_I = (fdata.field('ip_FLUX_APER2')*mJy2freq)*Freq2Lambda[4]
+        E_I = (fdata.field('ip_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[4]
+        F_z = (fdata.field('zp_FLUX_APER2')*mJy2freq)*Freq2Lambda[5]
+        E_z = (fdata.field('zp_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[5]
+        F_Y = (fdata.field('yHSC_FLUX_APER2')*mJy2freq)*Freq2Lambda[6]
+        E_Y = (fdata.field('yHSC_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[6]
+        F_J = (fdata.field('J_FLUX_APER2')*mJy2freq)*Freq2Lambda[7]
+        E_J = (fdata.field('J_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[7]
+        F_H = (fdata.field('H_FLUX_APER2')*mJy2freq)*Freq2Lambda[8]
+        E_H = (fdata.field('H_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[8]
+        F_Ks = (fdata.field('Ks_FLUX_APER2')*mJy2freq)*Freq2Lambda[9]
+        E_Ks = (fdata.field('Ks_FLUXERR_APER2')*mJy2freq)*Freq2Lambda[9]
+
+        return F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks
+
     elif Type == 'ABmag':
         print 'Update first to include same bands as Type="uJy"'
         # F_U = f1.field('u_MAG_APER2')
@@ -138,6 +170,10 @@ def make_cat_array(targetnames,coordinates,dataphot,t):
         size = 23
         F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks, Ftot_K, Etot_K = extract_filters(dataphot,t)
 
+    if t == 'cgsA_tot':
+        size = 21
+        F_U,E_U,F_B,E_B,F_V,E_V,F_R,E_R,F_I,E_I,F_z,E_z,F_Y,E_Y,F_J,E_J,F_H,E_H,F_Ks,E_Ks = extract_filters(dataphot,t)
+
 
     # RA and DEC of Photometric data
     alpha_J2000 = Phot_data.field('ALPHA_J2000')*2*np.pi/360 # radians
@@ -163,6 +199,8 @@ def make_cat_array(targetnames,coordinates,dataphot,t):
         if t == 'cgsA':
             Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID],Ftot_K[ID],Etot_K[ID]]
 
+        if t == 'cgsA_tot':
+            Array[ii] = [ii+1,F_U[ID],E_U[ID],F_B[ID],E_B[ID],F_V[ID],E_V[ID],F_R[ID],E_R[ID],F_I[ID],E_I[ID],F_z[ID],E_z[ID],F_Y[ID],E_Y[ID],F_J[ID],E_J[ID],F_H[ID],E_H[ID],F_Ks[ID],E_Ks[ID]]
 
     return Array
 
@@ -196,8 +234,9 @@ def read_out_catalogue(output_name,Arr,hdr_str):
 
 
 plotnr = 0
-type_unit = 'cgsA'
-
+# type_unit = 'cgsA'
+type_unit = 'cgsA_tot'
+# type_unit = 'uJy'
 
 ################################
 ### Input target coordinates ###
@@ -213,6 +252,7 @@ Namelist = ['105842','108899','155853','171060','171687','239220','230929','2505
 ##########################
 ### Read in Photometry ###
 Phot_data = read_in_COSMOS_cat('../../../X-shooter/cQGsample/COSMOS2015_Photometry/UVISTA-dr2_COSMOS_chi2_v7_03_02_15.fits')
+
 
 # # Read in COSMOS z_phot (La Phare galaxy template fits)
 # path_z = '/Volumes/DataDrive/X-shooter/P93/COSMOS2015_Photometry/zphot_ID_RA_DEC.txt'
@@ -242,6 +282,13 @@ if type_unit == 'cgsA':
 
 
     read_out_path = 'Output/PhotCat_xsh_all_V1_cgsA_NoSPLASH.cat'
+    read_out_catalogue(read_out_path,Catalogue_arr,header_string)
+
+if type_unit == 'cgsA_tot':
+    header_string = '#     id    U_colf     U_cole     B_colf     B_cole     V_colf     V_cole     R_colf     R_cole     I_colf     I_cole     z_colf     z_cole     Y_colf     Y_cole     J_colf     J_cole     H_colf     H_cole     K_colf     K_cole'
+
+
+    read_out_path = 'Output/PhotCat_xsh_all_V1_cgsA_NoSPLASH_Aper3.cat'
     read_out_catalogue(read_out_path,Catalogue_arr,header_string)
 
 if type_unit == 'uJy':
